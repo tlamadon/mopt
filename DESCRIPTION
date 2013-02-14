@@ -1,0 +1,15 @@
+Package: mopt
+Type: Package
+Title: A package run parallel estimation without derivative information
+Version: 0.1
+Date: 2013-02-14
+Author: Ran Gu, Thibaut Lamadon, FLorian Oswald
+Maintainer: Thibaut Lamadon <thibaut.lamadon@gmail.com>, Florian Oswald
+    <florian.oswald@gmail.com>
+Description: More about what it does (maybe more than one line)
+License: MIT
+Depends:
+    R (>= 2.12.1),
+LazyLoad: yes
+Collate:
+    'mopt-package.r'
