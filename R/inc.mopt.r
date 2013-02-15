@@ -589,7 +589,7 @@ computeCandidatesBGP <- function(param_data,rd,cf,N,niter) {
 
       if (length(im2)>0) {
        im2 = sample(im2,1)
-       val_new = param_data[im,]
+       val_new = param_data[im2,]
        val_new$chain = i
       }
     }
