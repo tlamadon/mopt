@@ -87,6 +87,7 @@ fitMirror <- function (x,LB=NA,UB=NA) {
 #' chain. 
 # @seelalso samplep
 mopt_config <- function(p) {
+	stopifnot(is.list(p))
  cf = list()
 
  cf$mode           = 'mpi'
@@ -96,7 +97,7 @@ mopt_config <- function(p) {
  cf$file_lastparam = 'param_submit.dat'
  cf$wd             = '~/git/ssp/R/'
  cf$source_on_nodes = 'run.modelest.r'
- cf$params_to_sample = c()
+ cf$params_to_sample = c()	# is that a vector of names or indices?
  cf$run            = 0
  cf$shock_var      = 0.1
  cf$moments_to_use = c()
@@ -104,7 +105,7 @@ mopt_config <- function(p) {
  cf$moments.sd     = c()
  cf$np_shock       = 1
  cf$save_freq      = 25
- cf$initial_value = p
+ cf$initial_value = p	
 
  pd = data.frame()
  for (n in names(p)) {
@@ -188,6 +189,7 @@ evaluateParameters <- function(ps,cf) {
     cat('Sending parameter evaluations...')
     vals = cf$mylapply(ps,mopt_obj_wrapper)
 
+	# what is ICNOV doing?
     ICONV = rep(FALSE,length(vals)) 
     for (i in 1:length(vals)) {
       if (!('status' %in% names(vals[[i]])))  {
@@ -288,6 +290,7 @@ runMOpt <- function(cf,autoload=TRUE) {
 
   cat('Number of nodes: ',cf$N,'\n')
 
+  # what is the meaning of these paramters?
   cf$theta  = seq(1,l=50)
   cf$breaks = seq(-2,0,l=50) 
   cf$acc    = 0.5
@@ -576,7 +579,10 @@ computeCandidatesBGP <- function(param_data,rd,cf,N,niter) {
   # for each chain, we need the last value, and the new value
   for (i in 1:N) {
     # get last realisation for that chain
+	  # what is this doing?! looks awful! :-)
+
     im = which( (param_data$chain == i) & param_data$i == max(param_data$i[param_data$chain==i]))[[1]]
+
     val_old = param_data[im,]
     val_new = rd[rd$chain==i,]
 
