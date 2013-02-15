@@ -1,52 +1,5 @@
-# we want to have a smart optimizer:
-# - the optimizer should be able to deal with mulitgoal
-# this is because estimation is difficult and usually
-# the programmer knows about which moment should
-# be controlling which parameter
-
-# first we need the use of an extended objective
-# function. In our case, this function should return
-# not only the total value, but a decomposition of that value
-# for example that might be the value on a set of moments
-
-# Then the user should able to supply a design matrix, that
-# defines the order in which both moments and parameters should
-# be considered for estimation
-# in this mulitspte estimation, the optimizer would start
-# by maximizing a subset of moments by shocking only 
-# a given set of parameters. It would then move to changing
-# deeper moments
-# In some sense this says that the optimizer should
-# first focus on subspaces of the parameter/objective value state
-
-# As it estimates, the optimizer should learn aobut the influence matrix.
-# from evaluations, it can learn which parameters supposively affect
-# the moments, and use that infomration to compute steepest descent
-# this is a sort of surrogate method
-
-# the objective function takes in relaxation parameters, tolerances
-# and max iteration, this can also be controled by the estimator
-# the objective function should return a list of achieved tolerance
-# and number of iterations
-# possiby the funciton should be able to use a cache and return
-# whether it was able to use it
-
-# also the optimizer shuold be able to apply transforms to the 
-# parameters
-
-# Feedback
-# the optimizer can get stuck an a low value (maybe a local min)
-# I need to have a better search theory with a smoother acceptance
-# drawing a probability, or picking the claue to be shocked from past
-# values with higher probabilities on smaller values.... -- keep several bests
-# or do multiple chains......
-# or ability to change several at the same time 
-
-# TODO
-#  - add 'param.' in front of the parameters
-#  - store value function distances / tolerances / loop counts
-#  - save which node computed which value
-#  - try to do some load balancing (clusterApplyLB)
+#' @include algos/algo.mh.r
+NULL
 
 require(plyr)
 require(MSBVAR)
@@ -85,7 +38,7 @@ fitMirror <- function (x,LB=NA,UB=NA) {
 
 #' create the configuration for the MCMC 
 #' chain. 
-# @seelalso samplep
+#' @export
 mopt_config <- function(p) {
 	stopifnot(is.list(p))
  cf = list()
@@ -137,7 +90,7 @@ datamoments <- function(names,values,sds) {
   return(res)
 }
 
-
+#' @export
 "+.mopt_config" <- function(cf,argb) {
 
  if (class(argb)=='mopt_smaplep') {
@@ -229,6 +182,7 @@ getParamStructure <- function() {
   return(param.descript)
 }
 
+#' @export
 prepare.mopt_config <- function(cf) {
   if (cf$mode=='mpi') {
     cat('[mode=mpi] USING MPI !!!!! \n')
@@ -262,10 +216,10 @@ prepare.mopt_config <- function(cf) {
   return(cf)
 }
 
-
-# this is the main function, it will run the
-# optimizer in parallel if called with MPI=TRUE
-# it will search for the minimum
+#' this is the main function, it will run the
+#' optimizer in parallel if called with MPI=TRUE
+#' it will search for the minimum
+#' @export
 runMOpt <- function(cf,autoload=TRUE) {
 
   # reading configuration
@@ -348,7 +302,6 @@ runMOpt <- function(cf,autoload=TRUE) {
   }
 }
 
-
 computeInitialCandidates <- function(N,cf) {
   ps = list()
   # generate N guesses
@@ -368,102 +321,6 @@ computeInitialCandidates <- function(N,cf) {
   }  
   return(ps)
 }  
-
-
-computeCandidates <- function(param_data,rd,cf,N,niter) {
-
-  # updating sampling distribution
-  # ------------------------------
-
-  # we are doing a Wang-Landau
-  # so we need to compute the histogram over 'Energies'
-  # actually why not do this non parametrically
-  # we take all past value and cmpute pdf
-
-  # for each value we can compute how many
-  # evaluations have happen close to them
-  # and use this to compute the accept reject
-
-  # then we can compute the Pr of the last evaluations at those
-  # values
-  rr = data.frame()
-
-  # if param_data is empty then we accept all
-  if (nrow(param_data)==0) {
-    return(list(nps = computeInitialCandidates(N,cf) , ndt = rd,cf=cf ))
-  }
-
-  # for each chain, we need the last value, and the new value
-  for (i in 1:N) {
-    # get last realisation for that chain
-    im = which( (param_data$chain == i) & param_data$i == max(param_data$i[param_data$chain==i]))[[1]]
-    val_old = param_data[im,]
-    val_new = rd[rd$chain==i,]
-
-    epdf <- function(x) {
-      hx =  findInterval(x,cf$breaks)
-      if (hx==0) return(10)
-      return(cf$theta[hx])
-    }
-
-    # compute accept reject
-    prob = pmin(1, epdf(val_old$value) / epdf(val_new$value))
-    # prob = pmin(1, exp((val_old$value - val_new$value)))
-    if (is.na(prob)) prob = 0; 
-
-    # decide on accept reject
-    if (prob > runif(1)) {
-      next_val = val_new
-      ACC = 1
-    } else {
-      next_val = val_old
-      ACC = 0
-    }
-    cat(' value and ratio:', epdf(val_old$value),' / ',epdf(val_new$value),'  ',val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,'\n')
-    
-    # update the distribution
-    # first we get the histogram for this value
-    hx = findInterval(next_val$value,cf$breaks)
-    cf$theta[hx] = cf$theta[hx] * exp(1/cf$kk)
-    cf$theta     = cf$theta * exp( -1/(cf$kk * (1:length(cf$theta))))
-    cf$theta     = cf$theta / sum(cf$theta)
-    cf$nu[hx]    = cf$nu[hx] + 1/niter
-    cf$nu        = cf$nu - 1/niter
-
-    # updating sampling variance
-    cf$acc = 0.9*cf$acc + 0.1*ACC
-    cf$shock_var = cf$shock_var + 1/niter*( 2*(cf$acc>0.234) -1)
-
-    # check flat histogram
-    if (max( abs( cf$nu - 1/(1:50)) < 0.01)) {
-        cat('updating kk')
-        cf$kk = cf$kk + 1
-        cf$nu = 0 * cf$nu
-    }
-
-    # change tempering
-    # if (prob > 0.95) cf$theta[i] = cf$theta[i]*1.1
-    # if (prob < 0.05) cf$theta[i] = cf$theta[i]*0.9 
-
-    # append to the chain
-    rr = rbind(rr,next_val)
-
-    # then we compute a guess for the chain  
-    # pick some parameters to update 
-    param <- sample(cf$params_to_sample, cf$np_shock)
-
-    val_new = next_val
-    for (pp in param) {
-       # update value
-       val_new[[pp]] = shockp(pp, val_new[[pp]] , cf$shock_var * cf$theta[i] , cf)
-    }
-
-    ps[[i]] = val_new
-  }
- 
-   return(list(nps = ps , ndt = rr, cf=cf ))
-}
-
 
 shockp <- function(name,value,shocksd,cf) {
   sh = rnorm(1,0,shocksd)
@@ -486,245 +343,8 @@ shockallp <- function(p,shocksd,VV,cf) {
   return(p)
 }
 
-computeCandidatesMH <- function(param_data,rd,cf,N,niter) {
-
-  # just a mulitchain MH
-
-  # then we can compute the Pr of the last evaluations at those
-  # values
-  rr = data.frame()
-
-  # if param_data is empty then we accept all
-  if (nrow(param_data)==0) {
-    cf$tempering = 1
-
-    return(list(nps = computeInitialCandidates(N,cf) , ndt = rd,cf=cf ))
-  }
-
-  # for each chain, we need the last value, and the new value
-  for (i in 1:N) {
-    # get last realisation for that chain
-    im = which( (param_data$chain == i) & param_data$i == max(param_data$i[param_data$chain==i]))[[1]]
-    val_old = param_data[im,]
-    val_new = rd[rd$chain==i,]
-
-    # compute accept reject
-    prob = pmin(1, exp( cf$tempering * (val_old$value - val_new$value)))
-    if (is.na(prob)) prob = 0; 
-
-    # decide on accept reject
-    if (prob > runif(1)) {
-      next_val = val_new
-      ACC = 1
-    } else {
-      next_val = val_old
-      ACC = 0
-    }
-    #cat(' value and ratio:', epdf(val_old$value),' / ',epdf(val_new$value),'  ',val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,' rate=',cf$acc ,'\n')
-    cat(' value and ratio:', val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,' rate=',cf$acc ,'\n')
-    
-    # updating sampling variance
-    cf$acc = 0.99*cf$acc + 0.01*ACC
-    cf$shock_var = cf$shock_var + 1/niter*( 2*(cf$acc>0.234) -1)
-
-    # change tempering
-    if (abs(cf$acc - 0.234)<0.1)  cf$tempering  =  cf$tempering  * 1.1
-    if (abs(cf$acc - 0.234)>0.22)  cf$tempering =  cf$tempering * 0.9 
-    # if (prob > 0.95) cf$theta[i] = cf$theta[i]*1.1
-    # if (prob < 0.05) cf$theta[i] = cf$theta[i]*0.9 
-
-    # append to the chain
-    rr = rbind(rr,next_val)
-
-    # then we compute a guess for the chain  
-    # pick some parameters to update 
-    param <- sample(cf$params_to_sample, cf$np_shock)
-
-    val_new = next_val
-    for (pp in param) {
-       # update value
-       val_new[[pp]] = shockp(pp, val_new[[pp]] , cf$shock_var * cf$theta[i] , cf)
-    }
-
-    ps[[i]] = val_new
-  }
- 
-   return(list(nps = ps , ndt = rr, cf=cf ))
-}
 
 
-computeCandidatesBGP <- function(param_data,rd,cf,N,niter) {
-
-  # multichain as in Baragatti Grimaud and Pommeret
-  # we are going to use N chains with each a different temperiing
-  # and we are also going to use energy rings for cross chain jumps
-
-  rr = data.frame()
-  ps=list()
-
-  # compute overall variance/covariance matrix
-
-  # if param_data is empty then we accept all
-  if (nrow(param_data)==0) {
-    cf$tempering = seq(100,0.001,l=N)
-    cf$acc       = seq(0.5,0.5,l=N)
-    cf$shock_var = seq(cf$shock_var,cf$shock_var,l=N)
-
-    return(list(nps = computeInitialCandidates(N,cf) , ndt = rd,cf=cf ))
-  } else {
-    # select the last 30 * params^2 observations
-    lower_bound_index = pmax(1, nrow(param_data) - 30 * length(cf$params_to_sample))
-    VV = cov(param_data[lower_bound_index:nrow(param_data),cf$params_to_sample])
-  }    
-
-  # for each chain, we need the last value, and the new value
-  for (i in 1:N) {
-    # get last realisation for that chain
-	  # what is this doing?! looks awful! :-)
-
-    im = which( (param_data$chain == i) & param_data$i == max(param_data$i[param_data$chain==i]))[[1]]
-
-    val_old = param_data[im,]
-    val_new = rd[rd$chain==i,]
-
-    # check for an Energy Ring jump
-    if ( 0.05 > runif(1)) {
-      # find the list of past values within 10% an energy ring in other chains
-      im2 = which( (param_data$chain != i) &  
-                   (abs(param_data$value - val_old$value)/
-                    abs(param_data$value) <0.1))
-
-      if (length(im2)>0) {
-       im2 = sample(im2,1)
-       val_new = param_data[im2,]
-       val_new$chain = i
-      }
-    }
-
-    # check is new value is NA
-    if (all(rd$chain!=i)) {
-      val_new = val_old
-      next_val = val_new
-      ACC = 0
-      prob= 0
-    # check that old value is NA!
-    } else if (!is.finite(val_old$value)) {
-      next_val = val_new
-      ACC = 1
-      prob =1
-    } else {
-
-      # compute accept reject -- classic Metropolis Hasting
-      prob = pmin(1, exp( cf$tempering[i] * (val_old$value - val_new$value)))
-      if (is.na(prob)) prob = 0; 
-
-      # decide on accept reject
-      if (prob > runif(1)) {
-        next_val = val_new
-        ACC = 1
-      } else {
-        next_val = val_old
-        ACC = 0
-      }
-    }
-
-    cat(' value and ratio:', val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,' rate=',cf$acc[i] ,' var=',cf$shock_var[i], '\n')
-    
-    # updating sampling variance
-    cf$acc[i] = 0.9*cf$acc[i] + 0.1*ACC
-    # increase/decrease by 5%
-    cf$shock_var[i] = cf$shock_var[i] * (1+ 0.05*( 2*(cf$acc[i]>0.234) -1))
 
 
-    # change tempering
-    # if (abs(cf$acc - 0.234)<0.1)  cf$tempering  =  cf$tempering  * 1.1
-    # if (abs(cf$acc - 0.234)>0.22)  cf$tempering =  cf$tempering * 0.9 
-    # if (prob > 0.95) cf$theta[i] = cf$theta[i]*1.1
-    # if (prob < 0.05) cf$theta[i] = cf$theta[i]*0.9 
-
-    # append to the chain
-    rownames(next_val) <- NULL
-    rr = rbind(rr,next_val)
-
-    # then we compute a guess for the chain  
-    # pick some parameters to update 
-
-    val_new = shockallp(next_val, cf$shock_var[i], VV, cf)
-
-    ps[[i]] = val_new
-  }
- 
-   return(list(nps = ps , ndt = rr, cf=cf ))
-}
-
-
-#' will vary each parameter independently from the 
-#' starting value and store all values. By default
-#' it will run for all parameters, otherwise it uses
-#' the argument list
-compute.slices <- function(mcf,ns=30,pad=0.2) {
-
-  # reading configuration
-  # =====================
-  pdesc = mcf$pdesc
-  p     = mcf$initial_value
-
-  # storing the time
-  # =============================
-  last_time = as.numeric(proc.time()[3])
-
-  p2 = mcf$initial_value #predict(mcf,'p.all')
-  maxres =  MOPT_OBJ_FUNC(p2)
-
-  cat('Number of nodes: ',mcf$N,'\n')
-
-
-  rr = data.frame() 
-  pp = mcf$params_to_sample[1]
-  nn=1
-
-  for (pp in mcf$params_to_sample) {
-
-    # we create a range, let's span the entire domain
-    lb = mcf$pdesc[pp,'lb']
-    ub = mcf$pdesc[pp,'ub']
-    prange = seq( lb+(ub-lb)*pad/2,  lb+(ub-lb)*(1-pad/2) ,l=ns)
-
-    # we put the values in a list of parameters
-    ptmp =p2
-    ps = list()
-    j=0
-    for (val in prange) {    
-      j=j+1
-      ptmp[[pp]] = val
-      ptmp$param_value = val
-      ptmp$chain=j
-      ps[[j]] = ptmp
-    }
-
-    cat('sending evaluations for ',pp,' in (', lb+(ub-lb)*pad/2,',',lb+(ub-lb)*(1-pad/2),')\n')
-    rs = mcf$mylbapply(ps,mopt_obj_wrapper)
-
-    rr1 <- evaluateParameters(ps,mcf)
-
-    cat('got ', nrow(rr1), ' values\n')
-
-    if (nrow(rr1)>0) {
-      rr1$param = pp
-      rr = rbind(rr,rr1)
-    }
-    cat('done with ',pp,'(',nn,'/',length(mcf$param_to_sample),')\n')
-    nn = nn+1
-
-  }
-
-save(rr,file='slices.dat')
-
-res = list()
-res$p.start = p2
-res$v.start = maxres
-res$slices  = rr
-return(res)
-
-}
 
