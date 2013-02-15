@@ -520,7 +520,8 @@ computeCandidatesMH <- function(param_data,rd,cf,N,niter) {
       next_val = val_old
       ACC = 0
     }
-    cat(' value and ratio:', epdf(val_old$value),' / ',epdf(val_new$value),'  ',val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,' rate=',cf$acc ,'\n')
+    #cat(' value and ratio:', epdf(val_old$value),' / ',epdf(val_new$value),'  ',val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,' rate=',cf$acc ,'\n')
+    cat(' value and ratio:', val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,' rate=',cf$acc ,'\n')
     
     # updating sampling variance
     cf$acc = 0.99*cf$acc + 0.01*ACC
