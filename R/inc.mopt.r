@@ -107,12 +107,12 @@ mopt_config <- function(p) {
  cf$save_freq      = 25
  cf$initial_value = p	
 
- pd = data.frame()
+ param.descript = data.frame()
  for (n in names(p)) {
-   pd = rbind(pd,data.frame(param=n, lb=NA , ub=NA))
+   param.descript = rbind(param.descript,data.frame(param=n, lb=NA , ub=NA))
  }
- rownames(pd) <- names(p)
- cf$pdesc = pd
+ rownames(param.descript) <- names(p)
+ cf$pdesc = param.descript
 
  class(cf) <- 'mopt_config'
 
@@ -217,16 +217,16 @@ evaluateParameters <- function(ps,cf) {
 
 getParamStructure <- function() {
   p = getStartingValues()
-  pd = data.frame()
+  param.descript = data.frame()
   for (n in names(p)) {
-    pd = rbind(pd,data.frame(param=n, lb=NA , ub=NA))
+    param.descript = rbind(param.descript,data.frame(param=n, lb=NA , ub=NA))
   }
-  rownames(pd) <- names(p)
+  rownames(param.descript) <- names(p)
 
-  pd[pd$param=='rho','lb'] = 0
-  pd[pd$param=='rho','ub'] = 1
+  param.descript[param.descript$param=='rho','lb'] = 0
+  param.descript[param.descript$param=='rho','ub'] = 1
 
-  return(pd)
+  return(param.descript)
 }
 
 prepare.mopt_config <- function(cf) {
