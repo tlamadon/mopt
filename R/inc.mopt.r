@@ -463,7 +463,7 @@ computeCandidates <- function(param_data,rd,cf,N,niter) {
 
 
 shockp <- function(name,value,shocksd,cf) {
-  sh = rnorm(1,shocksd)
+  sh = rnorm(1,0,shocksd)
   # update value
   return(fitMirror( value * (1 + sh/100) ,
                               LB = cf$pdesc[name,'lb'],
