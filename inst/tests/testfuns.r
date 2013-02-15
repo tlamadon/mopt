@@ -70,5 +70,22 @@ mixnorm <- function(x,means=c(0,2.5),sds=c(1,1),weight=c(0.25,0.75),plotit=FALSE
 
 
 
+# Rosenbrock's Banana function
+# global optimum is (1,1)
+# this is a smooth function, but could serve a test for MCMC.
+banana <- function(x){
+    return( 100 * (x[2] - x[1] * x[1])^2 + (1 - x[1])^2 )
+    }
+
+banana.plot <- function(){
+	d = expand.grid(x=seq(-3,3,le=50),y=seq(-3,3,le=50))
+	d$vals <- apply(d,1,banana)
+	dmat = matrix(d$vals,50,50)
+	persp(dmat,phi=10,theta=10,main="rosenbrock's banana function")
+}
+
+
+
+
 
 
