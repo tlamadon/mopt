@@ -46,7 +46,8 @@ mopt_config <- function(p) {
  cf$file_lastparam = 'param_submit.dat'
  cf$wd             = '~/git/ssp/R/'
  cf$source_on_nodes = 'run.modelest.r'
- cf$params_to_sample = c()	# is that a vector of names or indices?
+ cf$params_to_sample = c()	# is that a vector of names or indices? 
+                                #This is a vector of names: c('delta', 'b')
  cf$run            = 0
  cf$shock_var      = 0.1
  cf$moments_to_use = c()
@@ -139,6 +140,7 @@ evaluateParameters <- function(ps,cf) {
     vals = cf$mylapply(ps,mopt_obj_wrapper)
 
 	# what is ICNOV doing?
+        #  Vals is a list (later data.frame) of returned values and moments from each chain. If one chain returns NA, then ICONV deletes the whole line. However, the program crashes if all chains return NA value.   
     ICONV = rep(FALSE,length(vals)) 
     for (i in 1:length(vals)) {
       if (!('status' %in% names(vals[[i]])))  {
@@ -241,6 +243,7 @@ runMOpt <- function(cf,autoload=TRUE) {
   cat('Number of nodes: ',cf$N,'\n')
 
   # what is the meaning of these paramters?
+  # I find theta, breaks, nu, and kk are used algo.wl.r, acc is used to update sample var.
   cf$theta  = seq(1,l=50)
   cf$breaks = seq(-2,0,l=50) 
   cf$acc    = 0.5

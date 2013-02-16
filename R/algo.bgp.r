@@ -28,7 +28,8 @@ algo.bgp <- function(param_data,rd,cf,N,niter) {
   # for each chain, we need the last value, and the new value
   for (i in 1:N) {
     # get last realisation for that chain
-    # what is this doing?! looks awful! :-)
+    # what is this doing?! looks awful! :-) 
+    # check accept/reject of the new values for each chain, and get new draw. Can we run this part in parallel as well?
 
     im = which( (param_data$chain == i) & param_data$i == max(param_data$i[param_data$chain==i]))[[1]]
 
