@@ -1,9 +1,5 @@
-#' @include algos/algo.mh.r
-NULL
-
 require(plyr)
 require(MSBVAR)
-source('~/git/Utils/R/inc.utils.r')
 
 # functions that allows to mirror the parameters
 # to within the range of values

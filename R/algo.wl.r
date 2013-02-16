@@ -1,6 +1,10 @@
+#' Wang-Landau MCMC
+#' 
+#' Multi chain MCMC based on Wang-Landau
+#' 
 #' @export
 #' @family algos
-computeCandidatesWangLandau <- function(param_data,rd,cf,N,niter) {
+algo.wl <- function(param_data,rd,cf,N,niter) {
 
   # updating sampling distribution
   # ------------------------------

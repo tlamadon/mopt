@@ -1,6 +1,7 @@
+#' Baragatti Grimaud and Pommeret MCMC chain
 #' @export
 #' @family algos
-computeCandidatesBGP <- function(param_data,rd,cf,N,niter) {
+algo.bgp <- function(param_data,rd,cf,N,niter) {
 
   # multichain as in Baragatti Grimaud and Pommeret
   # we are going to use N chains with each a different temperiing

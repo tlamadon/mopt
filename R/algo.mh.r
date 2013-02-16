@@ -1,6 +1,7 @@
+#' Metropolis Hasting MCMC chain updating
 #' @export
 #' @family algos
-computeCandidatesMH <- function(param_data,rd,cf,N,niter) {
+algo.mh <- function(param_data,rd,cf,N,niter) {
 
   # just a mulitchain MH
 

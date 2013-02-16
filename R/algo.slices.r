@@ -1,10 +1,12 @@
-#' will vary each parameter independently from the 
+#' Compute the objective function on a grid
+#' 
+#' Will vary each parameter independently from the 
 #' starting value and store all values. By default
 #' it will run for all parameters, otherwise it uses
 #' the argument list
 #' @export
 #' @family algos
-compute.slices <- function(mcf,ns=30,pad=0.2) {
+algo.slices <- function(mcf,ns=30,pad=0.2) {
 
   # reading configuration
   # =====================

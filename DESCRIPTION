@@ -19,3 +19,6 @@ Collate:
     'inc.mopt.r'
     'inc.objectiveFunction.r'
     'inc.reporting.r'
+    'algo.bgp.r'
+    'algo.slices.r'
+    'algo.wl.r'
