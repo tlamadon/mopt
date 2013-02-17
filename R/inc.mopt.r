@@ -342,6 +342,9 @@ shockallp <- function(p,shocksd,VV,cf) {
   return(p)
 }
 
+list2df <- function(ll) {
+ return(ldply(ll,function(l){ return(data.frame(rbind(unlist(l))))}))
+}
 
 
 
