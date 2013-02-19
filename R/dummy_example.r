@@ -29,14 +29,37 @@ obj <- function(p) {
 # the minimum an algo has to do is generate new 
 # candidates... here we will just randomly sample
 # with a normal and give back N parameters
-algo.example <- function(chains, last, opts, priv) {
+algo.example <- function(chains, last, opts, params, priv) {
 
+  # first we need to compute the acceptance probability
+  # by taking the exponential of the difference between 
+  # new value and old value within each chain
+  for (i in 1:N) {
+
+    # compute the acceptance probability and the draw
+    chains[J(i,last)]$acc.pr = exp( chains[J(i,last)]$value - chains[J(i,last-1)]$value)
+    chains[J(i,last)]$acc    = (runif() > chains[J(i,last)]$acc)
+
+    # overwrite chain if not accepted
+    if (acc==FALSE) {
+      chains[J(i,last)]   <- chains[J(i,last-1)]
+      chains[J(i,last)]$n = last
+    }
+
+    # second we jump the parameters within their bounds
+    # here I am just uniformly picking them using the param description
+    vals = rnorm(nrow(params))
+    p = jumpParams.normalAndMirrored()
+  }
+
+  return(p)
 }
 
 run.example() <- function() {
 
-# create the mopt object with its config
-
+  # create the mopt object with its config
+  mcf <- mopt(init=p) + 
+        opts(N =4,)
 
 
 }

@@ -346,14 +346,14 @@ shockp <- function(name,value,shocksd,cf) {
                               UB = cf$pdesc[name,'ub']))
 }
 
-shockallp <- function(p,shocksd,VV,cf) {
+jumpParams.normalAndMirrored <- function(p,shocksd,VV,params.desc) {
   sh = rmultnorm(1,rep(0,nrow(VV)),VV) * shocksd
 
   # update value for each param
   for (pp in colnames(sh)) {
     p[[pp]] = fitMirror( p[[pp]] + sh[,pp] ,
-                              LB = cf$pdesc[pp,'lb'],
-                              UB = cf$pdesc[pp,'ub'])  
+                              LB = params.desc[pp,'lb'],
+                              UB = params.desc[pp,'ub'])  
   }
 
   return(p)
