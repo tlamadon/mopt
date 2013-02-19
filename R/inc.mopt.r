@@ -201,9 +201,26 @@ prepare.mopt_config <- function(cf) {
   } else if (cf$mode=='multicore') {
     cat('[mode=mulicore] YEAH !!!!! \n')    
     require(parallel)
-    cf$mylapply  = mclapply;
-    cf$mylbapply = mclapply;
-    cf$N=detectCores()
+    
+    if(Sys.info()[['sysname']]=='Windows') {
+      cl <- makeCluster(detectCores())
+      
+      # setting up the slaves
+      eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
+      eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
+      
+      # adding the normal lapply
+      cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
+      
+      # adding the load balanced lapply
+      cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
+      
+      cf$N = length(cl)
+    } else{
+      cf$mylapply  = mclapply;
+      cf$mylbapply = mclapply;
+      cf$N=detectCores()      
+    }
   } else {
     cf$mode = 'serial'
     cat('[mode=serial] NOT USING MPI !!!!! \n')    
