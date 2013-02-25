@@ -250,22 +250,28 @@ runMOpt <- function(cf,autoload=TRUE) {
   # start from best last value
   if (file.exists(cf$file_chain) & autoload ) {
     load(cf$file_chain)
+
+    #load saved mcf 
+    load('cf.dat')	  
+    cf <- c(cf,mmcf[setdiff(names(mmcf), names(cf))])
+    cf$shock_var = mmcf$shock_var
     cf$run = max(param_data$run) +1
 
   } else {
     param_data = data.frame()
     cf$run = 0
+
+    # what is the meaning of these paramters?
+    # I find theta, breaks, nu, and kk are used algo.wl.r, acc is used to update sample var.
+    cf$theta  = seq(1,l=50)
+    cf$breaks = seq(-2,0,l=50) 
+    cf$acc    = 0.5
+    cf$nu     = seq(0,l=50)
+    cf$kk     = 2
+    cf$i      = 1
   }
 
   cat('Number of nodes: ',cf$N,'\n')
-
-  # what is the meaning of these paramters?
-  # I find theta, breaks, nu, and kk are used algo.wl.r, acc is used to update sample var.
-  cf$theta  = seq(1,l=50)
-  cf$breaks = seq(-2,0,l=50) 
-  cf$acc    = 0.5
-  cf$nu     = seq(0,l=50)
-  cf$kk     = 2
 
   # we want to keep a matrix for the chain
   # it should be a data.frame in long format
@@ -283,7 +289,7 @@ runMOpt <- function(cf,autoload=TRUE) {
   ps = computeInitialCandidates(cf$N,cf)
 
   cat('Starting main MCMC loop\n')  
-  for (i in 1:cf$iter) {
+  for (i in cf$i:cf$iter) {
 
     cf$i=i
     # step 1, evaluate candidates 
@@ -292,6 +298,11 @@ runMOpt <- function(cf,autoload=TRUE) {
 
     if ( (i %% cf$save_freq)==1 & i>10 ) {
       save(param_data,file='evaluations.dat')
+      
+      #save mcf in case of restart
+      mmcf=cf
+      save(mmcf,file='cf.dat')
+
       #hist(param_data$value,50)
       #plot(cf$theta)
     }
