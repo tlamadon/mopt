@@ -14,7 +14,7 @@ algo.bgp <- function(param_data,rd,cf,N,niter) {
 
   # if param_data is empty then we accept all
   if (nrow(param_data)==0) {
-    cf$tempering = seq(100,0.001,l=N)
+    cf$tempering = seq(100,1,l=N)
     cf$acc       = seq(0.5,0.5,l=N)
     cf$shock_var = seq(cf$shock_var,cf$shock_var,l=N)
 
