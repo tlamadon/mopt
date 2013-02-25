@@ -9,11 +9,19 @@
 
 # Objective function The signature for the objective function is describe [here](Example).
 
+# what libraries are needed to run this example?
+library( ? )
+
+
+
 true_mean = c(2,-1)
 obj <- function(p) {
 
+  stopifnot(is.list(p))	# we require p be a list
+
   # simulate moments 
-  moments = apply(rmultnorm(50,mu=true_mean,diag(2)),2,mean)
+  p <- unlist(p) 	# however rmultnorm doesn't take lists.
+  moments = apply(rmultnorm(50,mu=p,diag(2)),2,mean)
   value = mean((true_mean - moments)^2)
 
   res = list(
