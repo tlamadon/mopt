@@ -156,13 +156,14 @@ evaluateParameters <- function(ps,cf) {
     
     # transform to array structure
     rvals = list2df(vals) 
+	rvals$chain <- 1:nrow(rvals)
     vals = unlist(rvals$value)  # store the objective values
 
     # saving values to data.frame for later use
     rd       = list2df(ps[])
     rd$i     = cf$i
     rd$run   = cf$run
-    rd = merge(rvals , rd[ICONV,c('chain',setdiff(names(rd),names(rvals)))], by='chain') # save all returned values
+    rd = merge(rvals , rd[ICONV,c("chain",setdiff(names(rd),names(rvals)))], by="chain") # save all returned values
     return(rd)
 }
 

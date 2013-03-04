@@ -10,7 +10,6 @@
 # Objective function The signature for the objective function is describe [here](Example).
 
 # what libraries are needed to run this example?
-library( ? )
 
 
 
@@ -63,11 +62,8 @@ algo.example <- function(chains, last, opts, params, priv) {
   return(p)
 }
 
-run.example() <- function() {
-
+run.example <- function() {
   # create the mopt object with its config
-  mcf <- mopt(init=p) + 
+  mcf <- runMOpt(init=p) + 
         opts(N =4,)
-
-
 }

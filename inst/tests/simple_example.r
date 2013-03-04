@@ -1,5 +1,7 @@
 require(mopt)
 
+setwd("~/git/mopt/")
+
 ## Create a 5 dimentional function with 10 local maxima.
 # creating the objective function   
 n = 5 # number of dimensions
@@ -33,7 +35,8 @@ MOPT_OBJ_FUNC <- function(p) {
 p = as.list(seq(0.5,0.5,l=n))
 names(p) <- paste('p',1:n,sep='')
 
-source('inc.mopt.r')
+source('R/inc.mopt.r')
+source('R/algo.bgp.r')
 
 # configure optimizer
 mcf                  = mopt_config(p)
@@ -41,7 +44,7 @@ mcf$wd               = '~/git/mopt/'                  # for objective function t
 mcf$params_all       = paste('p',1:n,sep = '')
 mcf$params_to_sample = paste('p',1:n,sep = '')
 mcf$iter             = 10000
-mcf$mode             = 'multicore'
+mcf$mode             = 'serial'
 mcf$save_freq        = 200
 mcf$shock_var        = 10      # initial value of r shock to parameters   
 
