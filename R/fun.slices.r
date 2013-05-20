@@ -5,7 +5,6 @@
 #' it will run for all parameters, otherwise it uses
 #' the argument list
 #' @export
-#' @family algos
 #' @example examples/example-slices.r
 compute.slices <- function(mcf,ns=30,pad=0.2) {
 

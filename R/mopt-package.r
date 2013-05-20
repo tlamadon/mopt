@@ -14,6 +14,9 @@
 #' algorithms are implemented and we encourage other people to write more of them and leverage the parallelization
 #' structure built into this library.
 #' 
+#' A very useful function is \code{\link{compute.slices}} and the associated \code{\link{plot.slices}} which will generate plots of how
+#' the different moments vary as you vary each parameters separately.
+#' 
 #' @import data.table 
 #' @import digest
 #' @docType package
