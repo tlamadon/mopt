@@ -9,3 +9,6 @@ doc:
 
 test:
 	Rscript -e "library('testthat'); require(devtools); test('./');"
+
+example1:
+	Rscript -e "source('examples/example-slices.r')"

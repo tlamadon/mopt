@@ -55,7 +55,9 @@ mopt_config <- function(p) {
  cf$moments.sd     = c()
  cf$np_shock       = 1
  cf$save_freq      = 25
- cf$initial_value = p	
+ cf$initial_value  = p	
+ cf$params_all     = names(p) #c('sep','c','b','s0','s1','firmMass','beta','delta','sigma','f_rho','f_mx','f_my','f_a')
+
 
  param.descript = data.frame()
  for (n in names(p)) {
@@ -69,7 +71,8 @@ mopt_config <- function(p) {
  return(cf)
 }
 
-
+#' defining sampling support for parameter
+#' @export
 samplep <- function(pp,lb,ub) {
   res = list()
   class(res) <- 'mopt_smaplep'
@@ -79,6 +82,8 @@ samplep <- function(pp,lb,ub) {
   return(res)
 }
 
+#' add data moments to the configuration
+#' @export 
 datamoments <- function(names,values,sds) {
   res = list()
   rr = data.frame(moment=names,value = values, sd = sds)
@@ -131,16 +136,21 @@ mopt_obj_wrapper <- function(p) {
   # later it would be good to get the error message
 }
 
-evaluateParameters <- function(ps,cf) {
+evaluateParameters <- function(ps,cf,balance=FALSE) {
     
     #save evaluations to file
     #save(ps,file='lasteval.dat')
 
     cat('Sending parameter evaluations...')
-    vals = cf$mylapply(ps,mopt_obj_wrapper)
+    if (balance) {
+      vals = cf$mylbapply(ps,mopt_obj_wrapper)
+    } else {
+      vals = cf$mylapply(ps,mopt_obj_wrapper)
+    }
 
-	# what is ICNOV doing?
-        #  Vals is a list (later data.frame) of returned values and moments from each chain. If one chain returns NA, then ICONV deletes the whole line. However, the program crashes if all chains return NA value.   
+	  # what is ICNOV doing?
+    #  Vals is a list (later data.frame) of returned values and moments from each chain. If one chain returns NA, 
+    #  then ICONV deletes the whole line. However, the program crashes if all chains return NA value.   
     ICONV = rep(FALSE,length(vals)) 
     for (i in 1:length(vals)) {
       if (!('status' %in% names(vals[[i]])))  {
@@ -156,7 +166,7 @@ evaluateParameters <- function(ps,cf) {
     
     # transform to array structure
     rvals = list2df(vals) 
-	rvals$chain <- 1:nrow(rvals)
+	  rvals$chain <- 1:nrow(rvals)
     vals = unlist(rvals$value)  # store the objective values
 
     # saving values to data.frame for later use
@@ -181,6 +191,7 @@ getParamStructure <- function() {
   return(param.descript)
 }
 
+#' prepares mopt to run with either MPI or openMP or just serial
 #' @export
 prepare.mopt_config <- function(cf) {
   if (cf$mode=='mpi') {
@@ -310,6 +321,7 @@ runMOpt <- function(cf,autoload=TRUE) {
 
     # step 3, updating chain and computing guesses
     rr = computeCandidatesBGP(param_data,rd, cf, cf$N, i)
+
     rr$ndt$i=i
     param_data = rbind(param_data,rr$ndt) # append to previous values
     ps = rr$nps

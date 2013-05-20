@@ -11,14 +11,21 @@ License: MIT
 Depends:
     R (>= 2.12.1),
     digest,
-    plyr
+    plyr,
+    MASS,
+    reshape,
+    stringr,
+    ggplot2,
+    data.table,
+    parallel
 LazyLoad: yes
 Collate:
     'mopt-package.r'
     'algo.mh.r'
     'inc.mopt.r'
-    'inc.objectiveFunction.r'
     'inc.reporting.r'
     'algo.bgp.r'
-    'algo.slices.r'
     'algo.wl.r'
+    'objfc.multipic.r'
+    'objfc.norm2.r'
+    'fun.slices.r'

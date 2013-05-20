@@ -11,8 +11,6 @@
 
 # what libraries are needed to run this example?
 
-
-
 true_mean = c(2,-1)
 obj <- function(p) {
 

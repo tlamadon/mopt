@@ -1,3 +1,7 @@
 man
 NAMESPACE
 *.r~
+est.slices.dat
+plot_ParamVsMoment_m1.png
+plot_ParamVsMoment_m2.png
+slices.dat
