@@ -6,7 +6,7 @@
 #' the argument list
 #' @export
 #' @example examples/example-slices.r
-compute.slices <- function(mcf,ns=30,pad=0.2) {
+compute.slices <- function(mcf,ns=30,pad=0.1) {
 
   # reading configuration
   # =====================
@@ -18,9 +18,10 @@ compute.slices <- function(mcf,ns=30,pad=0.2) {
   last_time = as.numeric(proc.time()[3])
 
   p2 = mcf$initial_value #predict(mcf,'p.all')
-  maxres =  MOPT_OBJ_FUNC(p2)
 
-  cat('Number of nodes: ',mcf$N,'\n')
+  cat('evaluate objective function at starting point\n')
+  maxres =  MOPT_OBJ_FUNC(p2)
+  cat(sprintf('%d nodes, %d parameters, %d points per grid \n',mcf$N,length(mcf$params_to_sample),ns)
 
   rr = data.frame() 
   pp = mcf$params_to_sample[1]
