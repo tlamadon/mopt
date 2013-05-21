@@ -42,6 +42,9 @@ run.simplex <- function(mcf) {
     lb[i] = mcf$pdesc$lb[mcf$pdesc$param==pp]
   }
 
+  print('using following bounds\n')
+  print(data.frame(var=mcf$params_to_sample,lb=lb,ub=ub))
+
   par0 = as.numeric(p[mcf$params_to_sample])
   control = list(maxfun = mcf$iter,iprint=4)
   # start the simplex
