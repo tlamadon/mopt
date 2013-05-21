@@ -108,8 +108,17 @@ plot.slices <- function(p,mcf,path='') {
       geom_hline(aes(yintercept=value),data=subset(mcf$data.moments,moment==pp),linetype=2) +
       geom_vline(aes(xintercept=value),data=params.data,linetype=2,color='red') +
       facet_wrap(~param,scales='free_x',ncol=3) +
-      scale_y_continuous(paste('value of',pp))+ scale_y_continuous('varying parameter') + theme_bw()
+      scale_y_continuous(paste('value of',pp))+ scale_x_continuous('varying parameter') + theme_bw()
     #print(gp)
     ggsave(paste(path,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
   }
+
+  pp ='value'
+  gp <- ggplot(subset(rr.m,variable==pp & from=='model')) + geom_point(aes(x=param_value,y=value,color=conv),size=1) + 
+      geom_line(aes(x=param_value,y=value),size=0.3) + 
+      geom_vline(aes(xintercept=value),data=params.data,linetype=2,color='red') +
+      facet_wrap(~param,scales='free_x',ncol=3) +
+      scale_y_continuous('objective function')+ scale_x_continuous('varying parameter') + theme_bw()
+    #print(gp)
+    ggsave(paste(path,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
  }
