@@ -13,11 +13,7 @@ mcf                  = mopt_config(p)
 mcf$wd               = getwd()
 mcf$params_to_sample = c('x1','x2')
 mcf$moments_to_use   = c('m1','m2')
-mcf$iter             = 5000
-mcf$mode             = 'serial'
-mcf$np_shock         = 2
-mcf$shock_var        = 1
-mcf$save_freq        = 10
+mcf$mode             = 'multicore'
 
 mcf <- mcf + 
   samplep('x1',-1,1) +
