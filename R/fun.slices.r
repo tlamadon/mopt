@@ -21,7 +21,7 @@ compute.slices <- function(mcf,ns=30,pad=0.1) {
 
   cat('evaluate objective function at starting point\n')
   maxres =  MOPT_OBJ_FUNC(p2)
-  cat(sprintf('%d nodes, %d parameters, %d points per grid \n',mcf$N,length(mcf$params_to_sample),ns)
+  cat(sprintf('%d nodes, %d parameters, %d points per grid \n',mcf$N,length(mcf$params_to_sample),ns))
 
   rr = data.frame() 
   pp = mcf$params_to_sample[1]
