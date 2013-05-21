@@ -14,6 +14,8 @@ run.simplex <- function(mcf) {
   # create the objective function
   objfunc <- function(x) {
     # get the parameter to sample
+    names(x) <- mcf$params_to_sample
+    print(x)
     p[mcf$params_to_sample] = x
     rr = MOPT_OBJ_FUNC(p)
 
@@ -21,6 +23,11 @@ run.simplex <- function(mcf) {
       infos$best <<- rr$value
     }
     infos$count <<- infos$count+1
+
+    if (!is.finite(rr$value)) {
+      cat('objective function value is not finite')
+      print(p)
+    }
 
     cat(sprintf("[%i] value=%f best=%f \n",infos$count,rr$value,infos$best))
     return(rr$value)
