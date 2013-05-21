@@ -17,7 +17,8 @@ Depends:
     stringr,
     ggplot2,
     data.table,
-    parallel
+    parallel,
+    dfoptim
 LazyLoad: yes
 Collate:
     'mopt-package.r'
@@ -29,3 +30,4 @@ Collate:
     'objfc.multipic.r'
     'objfc.norm2.r'
     'fun.slices.r'
+    'fun.serialoptim.r'
