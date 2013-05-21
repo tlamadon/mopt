@@ -1,4 +1,4 @@
-#' Runs a serial simplex
+#' Runs a serial optimization using minqa package
 #' 
 #' @export
 #' @example examples/example-serial-optim.r
@@ -14,8 +14,8 @@ run.simplex <- function(mcf) {
   # create the objective function
   objfunc <- function(x) {
     # get the parameter to sample
-    names(x) <- mcf$params_to_sample
-    print(x)
+    #names(x) <- mcf$params_to_sample
+    #print(x)
     p[mcf$params_to_sample] = x
     rr = MOPT_OBJ_FUNC(p)
 
@@ -43,9 +43,10 @@ run.simplex <- function(mcf) {
   }
 
   par0 = as.numeric(p[mcf$params_to_sample])
-  control = list(maxfeval = mcf$iter,info=TRUE)
+  control = list(maxfun = mcf$iter,iprint=4)
   # start the simplex
-  res = hjkb(par0, objfunc, lower=lb,upper=ub)
+  # res = hjkb(par0, objfunc, lower=lb,upper=ub)
+  res = bobyqa(par0, objfunc,lower=lb,upper=ub,control=control)
 
   return(res)
 }

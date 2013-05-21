@@ -18,7 +18,7 @@ Depends:
     ggplot2,
     data.table,
     parallel,
-    dfoptim
+    minqa
 LazyLoad: yes
 Collate:
     'mopt-package.r'
