@@ -71,7 +71,7 @@ compute.slices <- function(mcf,ns=30,pad=0.2) {
       rr1$param = pp
       rr = rbind(rr,rr1)
     }
-    cat('done with ',pp,'(',nn,'/',length(mcf$param_to_sample),')\n')
+    cat('done with ',pp,'(',nn,'/',length(mcf$params_to_sample),')\n')
     nn = nn+1
 
   }

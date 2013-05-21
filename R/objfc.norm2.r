@@ -8,7 +8,7 @@
 #' myfunc(list(m1=0,m2=0))
 objfc.norm2 <- function(mu=c(0,0),sigma=diag(2),ns=50) {
 
-  obj <- function(p) {
+  obj <- function(p,ms=c()) {
 
 	  stopifnot(is.list(p))	# we require p be a list
 
