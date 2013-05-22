@@ -7,7 +7,7 @@ This is a package intended for people who want to estimate a model based on some
 
 The parallelisation overhead is relatively costly, and so I would not recommend using this library if solving your model for a parameter set is under __1 second__. My experience has been that a solving time of around __30 seconds__ is a good place to start.
 
-Features:
+### Features:
 
  - works with MPI and OpenMP, but also in searial mode
  - offers serial optimization see [serial optim example](https://github.com/tlamadon/mopt/blob/master/examples/example-serial-optim.r) using the [minqa](http://cran.r-project.org/web/packages/minqa/index.html) package.
@@ -15,7 +15,7 @@ Features:
  - offers several reporting tools, but also exports to classic mcmc types to use in R
  - offers a function to compute slices of the objective function in orthogonal directions, see [example](https://github.com/tlamadon/mopt/blob/master/examples/example-slices.r).
 
-References:
+### References:
 
  - [Approximate Bayesian computation](http://en.wikipedia.org/wiki/Approximate_Bayesian_computation)
  - [Monte Carlo Markov Chain](http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo)
