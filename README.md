@@ -22,3 +22,10 @@ References:
  - "Determining the density of states for classical statistical models: A random walk algorithm to produce a flat histogram "
 Wang, F. and Landau, D. Physical Review E  64  056101  (2001)
  - ["An MCMC approach to classical estimation"](http://papers.ssrn.com/sol3/papers.cfm?abstract_id=420371) Chernozhukov and Hong,
+ - 
+ 
+### Authors
+
+ - Ran Gu
+ - Thibaut Lamadon
+ - Florian Oswald
