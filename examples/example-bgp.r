@@ -6,7 +6,7 @@ MOPT_OBJ_FUNC <- objfc.norm2(c(0,0),ns=2000)
 
 # starting parameters
 p <- list(x1=0.5,x2=0.5)
-MOPT_OBJ_FUNC(p)
+#MOPT_OBJ_FUNC(p)
 
 # then we want to setup the mopt
 mcf                  = mopt_config(p)

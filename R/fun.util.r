@@ -18,6 +18,17 @@ fitMirror <- function (x,LB=NA,UB=NA) {
  return(x)
 }
 
+checkEvalStructure <- function(val,cf) {
+  if (!("p" %in% names(val))) {
+    cat('error, p is not in the return value of the objective function\n')
+  } else {
+    missing = setdiff(names(cf$initial_value),names(val$p))
+    if (length(missing)>0) cat(paste(missing, collapse=', '), ' are missing from p in return value of objective function\n')
+  }
+  missing = setdiff(c('time','value','chain'),names(val))
+  if (length(missing)>0) cat(paste(missing, collapse=', '), ' are missing from return value of objective function\n')
+}
+
 #' @export
 evaluateParameters <- function(ps,cf,balance=FALSE) {
     
@@ -43,6 +54,7 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
         print(paste('error: ',val$error,'\n'))
         next
       }
+      checkEvalStructure(val,cf)
 
       # get param value back, and the chain
       pt = val$p
