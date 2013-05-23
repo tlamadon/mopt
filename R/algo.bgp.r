@@ -1,7 +1,7 @@
 #' Baragatti Grimaud and Pommeret MCMC chain
 #' @export
 #' @family algos
-algo.bgp <- function(chains, last, cfg, pdesc, priv) {
+algo.bgp <- function(evals, chains, last, cfg, pdesc, priv) {
 
   # multichain as in Baragatti Grimaud and Pommeret
   # we are going to use N chains with each a different temperiing
@@ -13,6 +13,7 @@ algo.bgp <- function(chains, last, cfg, pdesc, priv) {
   params_to_sample  = cfg$params_to_sample
   params_to_sample2 = paste('p',cfg$params_to_sample,sep='.')
   N                 = cfg$N
+  revals = data.frame()
 
   # compute overall variance/covariance matrix
 
@@ -33,14 +34,16 @@ algo.bgp <- function(chains, last, cfg, pdesc, priv) {
     rownames(VV) <- params_to_sample
   }    
 
-  # for each chain, we need the last value, and the new value
+  # for each chain, we need the last 2 values
+  # and decides whether we accept or reject
+  # th new one
   for (c.current in 1:N) {
     # for given current chain, find the latest value
     i.latest = max(subset(chains,chain==c.current)$i)
-    # select latest row
+    # select latest row in the history
     val_old = tail(subset(chains, chain==c.current & i==i.latest),1)
-    # create a new row, copy of the old one
-    val_new = val_old
+    # select the evaluations
+    val_new = subset(evals,chain==c.current)[1,]
 
     # check for an Energy Ring jump
     if ( 0.05 > runif(1)) {
@@ -56,18 +59,18 @@ algo.bgp <- function(chains, last, cfg, pdesc, priv) {
       }
     }
 
-    # check if new value is NA
+    # if there 
     if (all(chains$chain!=c.current)) {
       val_new  = val_old
       next_val = val_new
       ACC = 0
       prob= 0
       status = -1
-    # check that old value is NA!
+    # check that old value is NA, in which case we accept new one for sure
     } else if (!is.finite(val_old$value)) {
       next_val = val_new
-      ACC  =0
-      prob =0
+      ACC  =1
+      prob =1
       status = -2
     } else {
 
@@ -101,7 +104,7 @@ algo.bgp <- function(chains, last, cfg, pdesc, priv) {
 
     # append to the chain
     rownames(next_val) <- NULL
-    rr = rbind(rr,next_val)
+    revals = rbind(revals,next_val)
 
     # then we compute a guess for the chain  
     # pick some parameters to update 
@@ -114,7 +117,7 @@ algo.bgp <- function(chains, last, cfg, pdesc, priv) {
   }
  
   priv = list(chain.states = chain.states)
-  return(list(ps = ps , priv=priv ))
+  return(list(ps = ps , priv=priv, evals=revals ))
 }
 
 

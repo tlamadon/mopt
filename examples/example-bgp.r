@@ -14,7 +14,7 @@ mcf$wd               = getwd()
 mcf$params_to_sample = c('x1','x2')
 mcf$moments_to_use   = c('m1','m2')
 mcf$mode             = 'mutlicore'
-mcf$iter             = 100
+mcf$iter             = 300
 mcf$algo             = algo.bgp
 mcf$objfunc          = MOPT_OBJ_FUNC
 
@@ -37,6 +37,8 @@ mcf <- prepare.mopt_config(mcf)
 
 # compute slices and generate plots
 res = runMOpt(mcf,FALSE)
+
+ggplot(res,aes(x=p.x1,y=p.x2)) + geom_point() + facet_wrap(~chain) +theme_bw()
 
 print(res)
 

@@ -35,11 +35,13 @@ test_that("simple checks", {
   # get a set of parameters
   mcf <- prepare.mopt_config(mcf)
   ps  <- computeInitialCandidates(mcf$N,mcf)
-  rd  <- evaluateParameters(ps,mcf)
+
+  rd1  <- evaluateParameters(ps,mcf)
+  rd2  <- evaluateParameters(ps,mcf)
 
   # call algo.bgp
   priv=list()
-  res = algo.bgp(rd, 0, mcf, mcf$pdesc, priv)
+  res = algo.bgp(rd1,rd2, 0, mcf, mcf$pdesc, priv)
 
   expect_true(length(res$ps)==mcf$N, label='number of parameter set is correct')
   expect_true(length(res$ps)==mcf$N, label='number of parameter set is correct')

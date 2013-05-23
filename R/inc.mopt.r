@@ -229,6 +229,7 @@ runMOpt <- function(cf,autoload=TRUE) {
   # get initial candidates
   cat('Computing intial candidates\n')
   ps = computeInitialCandidates(cf$N,cf)
+  param_data = evaluateParameters(ps,cf)
 
   cat('Starting main MCMC loop\n')  
   for (i in cf$i:cf$iter) {
@@ -237,7 +238,6 @@ runMOpt <- function(cf,autoload=TRUE) {
     #                 step 1, evaluate candidates 
     # --------------------------------------------------------
     rd = evaluateParameters(ps,cf)
-    param_data = rbind(param_data,rd)
     if ( (i %% cf$save_freq)==1 & i>10 ) {
       save(param_data,file='evaluations.dat')      
       #save mcf in case of restart
@@ -247,9 +247,12 @@ runMOpt <- function(cf,autoload=TRUE) {
 
     #            step 2, updating chain and computing guesses
     # ----------------------------------------------------------------
-    rr   = mcf$algo(param_data, 0, mcf, mcf$pdesc, priv)
+    rr   = mcf$algo(rd,param_data, 0, mcf, mcf$pdesc, priv)
     priv = rr$priv
     ps   = rr$ps
+
+    # append the accepted/rejected draws
+    param_data = rbind(param_data,rr$evals)
 
     # small reporting
     # ----------------
