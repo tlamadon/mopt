@@ -22,8 +22,7 @@ The parallelisation overhead is relatively costly, and so I would not recommend 
  - [Monte Carlo Markov Chain](http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo)
  - "Determining the density of states for classical statistical models: A random walk algorithm to produce a flat histogram "
 Wang, F. and Landau, D. Physical Review E  64  056101  (2001)
- - ["An MCMC approach to classical estimation"](http://papers.ssrn.com/sol3/papers.cfm?abstract_id=420371) Chernozhukov and Hong,
- - 
+ - ["An MCMC approach to classical estimation"](http://papers.ssrn.com/sol3/papers.cfm?abstract_id=420371) Chernozhukov and Hong.
  
 ### Contributors
 
