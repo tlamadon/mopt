@@ -26,10 +26,11 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
 
     cat('Sending parameter evaluations...')
     if (balance) {
-      vals = cf$mylbapply(ps,mopt_obj_wrapper)
+      vals = cf$mylbapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
     } else {
-      vals = cf$mylapply(ps,mopt_obj_wrapper)
+      vals = cf$mylapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
     }
+    cat('done\n')
 
     # process the return values 1 by 1
     rr = data.frame()
@@ -38,17 +39,21 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
       # check the status
       rd = data.frame()
       if (!('status' %in% names(val))) next;
-    
+      if (val$status<0) {
+        print(paste('error: ',val$error,'\n'))
+        next
+      }
+
       # get param value back, and the chain
       pt = val$p
       pt$chain = NULL
       names(pt) <- paste('p',names(pt),sep='.')
       rd  = data.frame(pt)
+
       rd$value  = val$value
       rd$status = val$status
       rd$time   = val$time
       rd$chain  = val$chain
-
 
       # collect the addititonal infos
       if (length(val$infos)>0) {

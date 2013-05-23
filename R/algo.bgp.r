@@ -1,7 +1,7 @@
 #' Baragatti Grimaud and Pommeret MCMC chain
 #' @export
 #' @family algos
-algo.bgp <- function(chains, last, opts, pdesc, priv) {
+algo.bgp <- function(chains, last, cfg, pdesc, priv) {
 
   # multichain as in Baragatti Grimaud and Pommeret
   # we are going to use N chains with each a different temperiing
@@ -12,7 +12,7 @@ algo.bgp <- function(chains, last, opts, pdesc, priv) {
 
   params_to_sample  = pdesc$param
   params_to_sample2 = paste('p',pdesc$param,sep='.')
-  N                 = opts$N
+  N                 = cfg$N
 
   # compute overall variance/covariance matrix
 
@@ -21,14 +21,16 @@ algo.bgp <- function(chains, last, opts, pdesc, priv) {
     chain.states = list()
     chain.states$tempering = seq(100,1,l=N)
     chain.states$acc       = seq(0.5,0.5,l=N)
-    chain.states$shock_var = seq(opts$shock_var,opts$shock_var,l=N)
-    priv = list(chain_states = chain.states)
+    chain.states$shock_var = seq(cfg$shock_var,cfg$shock_var,l=N)
+    priv = list(chain.states = chain.states)
   }
-  if (nrow(chains)==0)  {
+  if (nrow(chains)>0)  {
     # select the last 30 * params^2 observations
     chain.states     = priv$chain.states
     lower_bound_index = pmax(1, nrow(chains) - 30 * length(params_to_sample))
     VV = cov(chains[lower_bound_index:nrow(chains),params_to_sample2])
+    colnames(VV) <- params_to_sample
+    rownames(VV) <- params_to_sample
   }    
 
   # for each chain, we need the last value, and the new value
@@ -55,7 +57,7 @@ algo.bgp <- function(chains, last, opts, pdesc, priv) {
     }
 
     # check if new value is NA
-    if (all(rd$chain!=c.current)) {
+    if (all(chains$chain!=c.current)) {
       val_new  = val_old
       next_val = val_new
       ACC = 0
@@ -81,7 +83,7 @@ algo.bgp <- function(chains, last, opts, pdesc, priv) {
       }
     }
 
-    cat(' value and ratio:', val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,' rate=',priv$acc[c.current] ,' var=',priv$shock_var[c.current], '\n')
+    cat(sprintf(' value and ratio: %f/%f A=%d prob=%f rate=%f var=%f\n', val_old$value, val_new$value,  ACC, prob, chain.states$acc[c.current] ,chain.states$shock_var[c.current]))
     
     # updating sampling variance
     chain.states$acc[c.current]       = 0.9*chain.states$acc[c.current] + 0.1*ACC
@@ -100,9 +102,12 @@ algo.bgp <- function(chains, last, opts, pdesc, priv) {
 
     # then we compute a guess for the chain  
     # pick some parameters to update 
-    val_new = shockallp(next_val, chain.states$shock_var[c.current], VV, cf)
+    p.new = cfg$initial_value
+    p.new$chain = c.current
+    p.new[params_to_sample] = next_val[1,params_to_sample2]
+    p.new = shockallp(p.new, chain.states$shock_var[c.current], VV, cfg)
 
-    ps[[c.current]] = val_new
+    ps[[c.current]] = p.new
   }
  
   priv = list(chain.states = chain.states)

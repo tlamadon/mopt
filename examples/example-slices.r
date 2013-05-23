@@ -34,4 +34,4 @@ options(mc.cores = detectCores())
 mcf <- prepare.mopt_config(mcf)
 
 # compute slices and generate plots
-res <- runMopt(mcf)
+res <- runMOpt(mcf,FALSE)

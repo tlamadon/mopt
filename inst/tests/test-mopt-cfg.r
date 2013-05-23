@@ -13,6 +13,7 @@ test_that("checking structure creation", {
   mcf$mode             = 'serial'
   mcf$iter             = 100
   mcf$algo             = algo.bgp
+  mcf$objfunc          = function(x) x
 
   # set the parameter bounds
   mcf <- mcf + 

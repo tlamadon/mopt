@@ -9,7 +9,7 @@ test_that("simple checks", {
 
   # starting parameters
   p <- list(x1=0.5,x2=0.5)
-  MOPT_OBJ_FUNC(p)
+  # MOPT_OBJ_FUNC(p)
 
   # then we want to setup the mopt
   mcf                  = mopt_config(p)
@@ -20,6 +20,7 @@ test_that("simple checks", {
   mcf$iter             = 100
   mcf$algo             = algo.bgp
   mcf$N                = 4
+  mcf$objfunc          = MOPT_OBJ_FUNC
 
   # set the parameter bounds
   mcf <- mcf + 
@@ -32,17 +33,17 @@ test_that("simple checks", {
                              c(0.1,0.1))
 
   # get a set of parameters
-  ps = computeInitialCandidates(mcf$N,mcf)
   mcf <- prepare.mopt_config(mcf)
-
-  # evaluate them
-  rd = evaluateParameters(ps,mcf)
+  ps  <- computeInitialCandidates(mcf$N,mcf)
+  rd  <- evaluateParameters(ps,mcf)
 
   # call algo.bgp
   priv=list()
-  algo.bgp(rd, 0, mcf, mcf$pdesc, priv)
-  chains = rd
-  opts = mcf
-  pdesc = mcf$pdesc
+  res = algo.bgp(rd, 0, mcf, mcf$pdesc, priv)
+
+  expect_true(length(res$ps)==mcf$N, label='number of parameter set is correct')
+  expect_true(length(res$ps)==mcf$N, label='number of parameter set is correct')
+  #p1 = res$ps[[1]]
+  #expect_true()
 
 })

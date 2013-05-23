@@ -13,9 +13,10 @@ mcf                  = mopt_config(p)
 mcf$wd               = getwd()
 mcf$params_to_sample = c('x1','x2')
 mcf$moments_to_use   = c('m1','m2')
-mcf$mode             = 'multicore'
+mcf$mode             = 'mutlicore'
 mcf$iter             = 100
 mcf$algo             = algo.bgp
+mcf$objfunc          = MOPT_OBJ_FUNC
 
 # set the parameter bounds
 mcf <- mcf + 

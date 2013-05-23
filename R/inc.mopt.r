@@ -89,11 +89,11 @@ datamoments <- function(names,values,sds) {
  return(cf)
 }
 
-mopt_obj_wrapper <- function(p) {
+mopt_obj_wrapper <- function(p,objfunc=NA) {
   m = tryCatch( {
 
     # get result
-    r = MOPT_OBJ_FUNC(p)  
+    r = objfunc(p)  
 
     if (!is.list(r)) {
       r = list(value=r)
@@ -182,6 +182,7 @@ runMOpt <- function(cf,autoload=TRUE) {
   # =====================
   pdesc = cf$pdesc
   p     = cf$initial_value
+  priv = list()
 
   # setting up the cluster if MPI
   # =============================
@@ -246,18 +247,15 @@ runMOpt <- function(cf,autoload=TRUE) {
 
     #            step 2, updating chain and computing guesses
     # ----------------------------------------------------------------
-    rr = mcf$algo(param_data,rd, cf, cf$N, i)
+    rr   = mcf$algo(param_data, 0, mcf, mcf$pdesc, priv)
+    priv = rr$priv
+    ps   = rr$ps
 
-    #            step 3, process output / transform it to a table
-    # ----------------------------------------------------------------
-
-    rr$ndt$i=i
-    param_data = rbind(param_data,rr$ndt) # append to previous values
-    ps = rr$nps
-    cf = rr$cf
+    # small reporting
+    # ----------------
     cat('[',i,'/', cf$iter ,'][', as.numeric(proc.time()[3]), '][', as.numeric(proc.time()[3]) - last_time  , '] best value is ' , min(param_data$value,na.rm=TRUE) ,'\n') 
     last_time = as.numeric(proc.time()[3])
-    for (pp in cf$params_to_sample) {
+    for (pp in paste('p',cf$params_to_sample,sep='.')) {
       cat(' range for ',pp,' ',range(param_data[,pp]),'\n')
     }
   }
@@ -266,9 +264,11 @@ runMOpt <- function(cf,autoload=TRUE) {
   save(param_data,file='evaluations.dat')  
 
   # stopping the cluster using R snow command
-  if (cf$USE_MPI) {
-    stopCluster(cl)
-  }
+  #if (cf$USE_MPI) {
+  #  stopCluster(cl)
+  #}
+
+  return(param_data)
 }
 
 
