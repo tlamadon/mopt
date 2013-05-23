@@ -10,8 +10,8 @@ algo.bgp <- function(chains, last, cfg, pdesc, priv) {
   rr = data.frame()
   ps=list()
 
-  params_to_sample  = pdesc$param
-  params_to_sample2 = paste('p',pdesc$param,sep='.')
+  params_to_sample  = cfg$params_to_sample
+  params_to_sample2 = paste('p',cfg$params_to_sample,sep='.')
   N                 = cfg$N
 
   # compute overall variance/covariance matrix
