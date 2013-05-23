@@ -83,6 +83,7 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
       }
       rr = rbind(rr,rd)
     }
+    cat(sprintf('evaluations are finished [%d/%d]\n',nrow(rr),length(ps)))
 
     # return the evaluations
     rr$i     = cf$i

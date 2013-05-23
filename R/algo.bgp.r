@@ -62,11 +62,13 @@ algo.bgp <- function(chains, last, cfg, pdesc, priv) {
       next_val = val_new
       ACC = 0
       prob= 0
+      status = -1
     # check that old value is NA!
     } else if (!is.finite(val_old$value)) {
       next_val = val_new
       ACC  =0
       prob =0
+      status = -2
     } else {
 
       # compute accept reject -- classic Metropolis Hasting
@@ -81,9 +83,10 @@ algo.bgp <- function(chains, last, cfg, pdesc, priv) {
         next_val = val_old
         ACC = 0
       }
+      status = 1
     }
 
-    cat(sprintf(' value and ratio: %f/%f A=%d prob=%f rate=%f var=%f\n', val_old$value, val_new$value,  ACC, prob, chain.states$acc[c.current] ,chain.states$shock_var[c.current]))
+    cat(sprintf(' value and ratio: %f/%f A=%d prob=%f rate=%f var=%f status=%d\n', val_old$value, val_new$value,  ACC, prob, chain.states$acc[c.current] ,chain.states$shock_var[c.current],status))
     
     # updating sampling variance
     chain.states$acc[c.current]       = 0.9*chain.states$acc[c.current] + 0.1*ACC
