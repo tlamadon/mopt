@@ -10,24 +10,25 @@ algo.bgp <- function(chains, last, opts, pdesc, priv) {
   rr = data.frame()
   ps=list()
 
-  params_to_sample = pdesc$param
-  N                = opts$N
+  params_to_sample  = pdesc$param
+  params_to_sample2 = paste('p',pdesc$param,sep='.')
+  N                 = opts$N
 
   # compute overall variance/covariance matrix
 
   # if chains is empty then we accept all
-  if (nrow(chains)==0) {
+  if (is.null(priv$chain.states)) {
+    chain.states = list()
     chain.states$tempering = seq(100,1,l=N)
     chain.states$acc       = seq(0.5,0.5,l=N)
-    chain.states$shock_var = seq(cf$shock_var,cf$shock_var,l=N)
-    priv = list(chain_states = )
-    return(list(ps = computeInitialCandidates(N,cf), priv=priv))
-
-  } else {
+    chain.states$shock_var = seq(opts$shock_var,opts$shock_var,l=N)
+    priv = list(chain_states = chain.states)
+  }
+  if (nrow(chains)==0)  {
     # select the last 30 * params^2 observations
     chain.states     = priv$chain.states
     lower_bound_index = pmax(1, nrow(chains) - 30 * length(params_to_sample))
-    VV = cov(chains[lower_bound_index:nrow(chains),params_to_sample])
+    VV = cov(chains[lower_bound_index:nrow(chains),params_to_sample2])
   }    
 
   # for each chain, we need the last value, and the new value
@@ -49,12 +50,12 @@ algo.bgp <- function(chains, last, opts, pdesc, priv) {
       if (length(im2)>0) {
        im2 = sample(im2,1)
        val_new = chains[im2,]
-       val_new$chain = i
+       val_new$chain = c.current
       }
     }
 
     # check if new value is NA
-    if (all(rd$chain!=i)) {
+    if (all(rd$chain!=c.current)) {
       val_new  = val_old
       next_val = val_new
       ACC = 0
@@ -67,7 +68,7 @@ algo.bgp <- function(chains, last, opts, pdesc, priv) {
     } else {
 
       # compute accept reject -- classic Metropolis Hasting
-      prob = pmin(1, exp( chain.states$tempering[i] * (val_old$value - val_new$value)))
+      prob = pmin(1, exp( chain.states$tempering[c.current] * (val_old$value - val_new$value)))
       if (is.na(prob)) prob = 0; 
 
       # decide on accept reject
@@ -80,12 +81,12 @@ algo.bgp <- function(chains, last, opts, pdesc, priv) {
       }
     }
 
-    cat(' value and ratio:', val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,' rate=',priv$acc[i] ,' var=',priv$shock_var[i], '\n')
+    cat(' value and ratio:', val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,' rate=',priv$acc[c.current] ,' var=',priv$shock_var[c.current], '\n')
     
     # updating sampling variance
-    chain.states$acc[i]       = 0.9*chain.states$acc[i] + 0.1*ACC
+    chain.states$acc[c.current]       = 0.9*chain.states$acc[c.current] + 0.1*ACC
     # increase/decrease by 5%
-    chain.states$shock_var[i] = chain.states$shock_var[i] * (1+ 0.05*( 2*(chain.states$acc[i]>0.234) -1))
+    chain.states$shock_var[c.current] = chain.states$shock_var[c.current] * (1+ 0.05*( 2*(chain.states$acc[c.current]>0.234) -1))
 
     # change tempering
     # if (abs(cf$acc - 0.234)<0.1)  cf$tempering  =  cf$tempering  * 1.1
@@ -99,9 +100,9 @@ algo.bgp <- function(chains, last, opts, pdesc, priv) {
 
     # then we compute a guess for the chain  
     # pick some parameters to update 
-    val_new = shockallp(next_val, chain.states$shock_var[i], VV, cf)
+    val_new = shockallp(next_val, chain.states$shock_var[c.current], VV, cf)
 
-    ps[[i]] = val_new
+    ps[[c.current]] = val_new
   }
  
   priv = list(chain.states = chain.states)

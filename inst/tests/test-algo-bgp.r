@@ -32,14 +32,17 @@ test_that("simple checks", {
                              c(0.1,0.1))
 
   # get a set of parameters
-  ps = mopt:::computeInitialCandidates(mcf$N,mcf)
+  ps = computeInitialCandidates(mcf$N,mcf)
   mcf <- prepare.mopt_config(mcf)
 
   # evaluate them
-  rd = mopt:::evaluateParameters(ps,mcf)
+  rd = evaluateParameters(ps,mcf)
 
   # call algo.bgp
   priv=list()
   algo.bgp(rd, 0, mcf, mcf$pdesc, priv)
+  chains = rd
+  opts = mcf
+  pdesc = mcf$pdesc
 
 })

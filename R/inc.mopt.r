@@ -21,6 +21,7 @@ mopt_config <- function(p) {
 
  cf$mode           = 'mpi'
  cf$iter           = 10
+ cf$i              = 0
  cf$use_last_run   = TRUE
  cf$file_chain     = 'evaluations.dat'
  cf$file_lastparam = 'param_submit.dat'

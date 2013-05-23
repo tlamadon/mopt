@@ -18,6 +18,7 @@ fitMirror <- function (x,LB=NA,UB=NA) {
  return(x)
 }
 
+#' @export
 evaluateParameters <- function(ps,cf,balance=FALSE) {
     
     #save evaluations to file
@@ -47,6 +48,7 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
       rd$status = val$status
       rd$time   = val$time
       rd$chain  = val$chain
+
 
       # collect the addititonal infos
       if (length(val$infos)>0) {
@@ -85,6 +87,7 @@ getParamStructure <- function() {
   return(param.descript)
 }
 
+#' @export
 computeInitialCandidates <- function(N,cf) {
   ps = list()
   # generate N guesses
@@ -105,12 +108,27 @@ computeInitialCandidates <- function(N,cf) {
   return(ps)
 }  
 
+#' @export
 shockp <- function(name,value,shocksd,cf) {
   sh = rnorm(1,0,shocksd)
   # update value
   return(fitMirror( value * (1 + sh/100) ,
                               LB = cf$pdesc[name,'lb'],
                               UB = cf$pdesc[name,'ub']))
+}
+
+#' @export
+shockallp <- function(p,shocksd,VV,cf) {
+  sh = rmultnorm(1,rep(0,nrow(VV)),VV) * shocksd
+
+  # update value for each param
+  for (pp in colnames(sh)) {
+    p[[pp]] = fitMirror( p[[pp]] + sh[,pp] ,
+                              LB = cf$pdesc[pp,'lb'],
+                              UB = cf$pdesc[pp,'ub'])  
+  }
+
+  return(p)
 }
 
 jumpParams.normalAndMirrored <- function(p,shocksd,VV,params.desc) {
