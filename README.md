@@ -12,6 +12,7 @@ The parallelisation overhead is relatively costly, and so I would not recommend 
  - works with MPI and OpenMP, but also in searial mode
  - offers serial optimization see [serial optim example](https://github.com/tlamadon/mopt/blob/master/examples/example-serial-optim.r) using the [minqa](http://cran.r-project.org/web/packages/minqa/index.html) package.
  - offers several MCMC implementations (see list of algorithms)
+   - see [bgp example](https://github.com/tlamadon/mopt/blob/master/examples/example-bgp.r) for [Likelihood-Free Parallel Tempering](http://arxiv.org/abs/1108.3423)  by  Baragatti Grimaud and Pommeret 
  - offers several reporting tools, but also exports to classic mcmc types to use in R
  - offers a function to compute slices of the objective function in orthogonal directions, see [example](https://github.com/tlamadon/mopt/blob/master/examples/example-slices.r).
 
