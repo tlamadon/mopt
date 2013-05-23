@@ -29,7 +29,7 @@ algo.bgp <- function(evals, chains, last, cfg, pdesc, priv) {
     # select the last 30 * params^2 observations
     chain.states     = priv$chain.states
     lower_bound_index = pmax(1, nrow(chains) - 30 * length(params_to_sample))
-    VV = cov(chains[lower_bound_index:nrow(chains),params_to_sample2])
+    VV = cov(chains[lower_bound_index:nrow(chains),params_to_sample2]) + 0.001 * diag(mcf$pdesc$ub - mcf$pdesc$lb)
     colnames(VV) <- params_to_sample
     rownames(VV) <- params_to_sample
   }    
