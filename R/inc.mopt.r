@@ -1,26 +1,6 @@
 require(plyr)
 require(MSBVAR)
 
-# functions that allows to mirror the parameters
-# to within the range of values
-fitMirror <- function (x,LB=NA,UB=NA) {
-  test1 = TRUE
-  test2 = TRUE
-  while( test1 | test2) {
-    if ( !is.na(UB) & (x>UB)) {
-      x = 2*UB - x 
-    } else {
-      test1 = FALSE
-    } 
-    if ( !is.na(LB) & (x<LB)) {
-      x = 2*LB - x
-    } else {
-      test2 = FALSE
-    } 
-  }
- return(x)
-}
-
 # setting up the config
 # should be given 
 # list of model parameters including, 
@@ -98,6 +78,7 @@ datamoments <- function(names,values,sds) {
  if (class(argb)=='mopt_smaplep') {
     cf$pdesc[argb$pp,'lb'] = argb$lb
     cf$pdesc[argb$pp,'ub'] = argb$ub
+    cf$pdesc$param = paste(cf$pdesc$param)
  }
 
  if (class(argb)=='mopt_dmoms') {
@@ -136,60 +117,7 @@ mopt_obj_wrapper <- function(p) {
   # later it would be good to get the error message
 }
 
-evaluateParameters <- function(ps,cf,balance=FALSE) {
-    
-    #save evaluations to file
-    #save(ps,file='lasteval.dat')
 
-    cat('Sending parameter evaluations...')
-    if (balance) {
-      vals = cf$mylbapply(ps,mopt_obj_wrapper)
-    } else {
-      vals = cf$mylapply(ps,mopt_obj_wrapper)
-    }
-
-	  # what is ICNOV doing?
-    #  Vals is a list (later data.frame) of returned values and moments from each chain. If one chain returns NA, 
-    #  then ICONV deletes the whole line. However, the program crashes if all chains return NA value.   
-    ICONV = rep(FALSE,length(vals)) 
-    for (i in 1:length(vals)) {
-      if (!('status' %in% names(vals[[i]])))  {
-        ICONV[i]=FALSE;
-      } else { 
-        ICONV[i] = vals[[i]]$status==1
-      }
-    }
-    # we start by removing any NA value
-    #ICONV = unlist(Map(function(e) {e$status==1},vals))
-    cat('done (vals=',sum(ICONV),'/',length(ps),')\n')    
-    vals = vals[ICONV] # finish treating non convergence correctly!!!!!
-    
-    # transform to array structure
-    rvals = list2df(vals) 
-	  rvals$chain <- 1:nrow(rvals)
-    vals = unlist(rvals$value)  # store the objective values
-
-    # saving values to data.frame for later use
-    rd       = list2df(ps[])
-    rd$i     = cf$i
-    rd$run   = cf$run
-    rd = merge(rvals , rd[ICONV,c("chain",setdiff(names(rd),names(rvals)))], by="chain") # save all returned values
-    return(rd)
-}
-
-getParamStructure <- function() {
-  p = getStartingValues()
-  param.descript = data.frame()
-  for (n in names(p)) {
-    param.descript = rbind(param.descript,data.frame(param=n, lb=NA , ub=NA))
-  }
-  rownames(param.descript) <- names(p)
-
-  param.descript[param.descript$param=='rho','lb'] = 0
-  param.descript[param.descript$param=='rho','ub'] = 1
-
-  return(param.descript)
-}
 
 #' prepares mopt to run with either MPI or openMP or just serial
 #' @export
@@ -304,23 +232,23 @@ runMOpt <- function(cf,autoload=TRUE) {
   for (i in cf$i:cf$iter) {
 
     cf$i=i
-    # step 1, evaluate candidates 
-    # ----------------------------------------------------------------------
+    #                 step 1, evaluate candidates 
+    # --------------------------------------------------------
     rd = evaluateParameters(ps,cf)
-
+    param_data = rbind(param_data,rd)
     if ( (i %% cf$save_freq)==1 & i>10 ) {
-      save(param_data,file='evaluations.dat')
-      
+      save(param_data,file='evaluations.dat')      
       #save mcf in case of restart
       mmcf=cf
       save(mmcf,file='cf.dat')
-
-      #hist(param_data$value,50)
-      #plot(cf$theta)
     }
 
-    # step 3, updating chain and computing guesses
-    rr = computeCandidatesBGP(param_data,rd, cf, cf$N, i)
+    #            step 2, updating chain and computing guesses
+    # ----------------------------------------------------------------
+    rr = mcf$algo(param_data,rd, cf, cf$N, i)
+
+    #            step 3, process output / transform it to a table
+    # ----------------------------------------------------------------
 
     rr$ndt$i=i
     param_data = rbind(param_data,rr$ndt) # append to previous values
@@ -342,50 +270,6 @@ runMOpt <- function(cf,autoload=TRUE) {
   }
 }
 
-computeInitialCandidates <- function(N,cf) {
-  ps = list()
-  # generate N guesses
-  for (j in 1:N) {
-    np = cf$initial_value 
-
-    # pick some parameters to update 
-    param <- sample(cf$params_to_sample, cf$np_shock)
-
-    for (pp in param) {
-       # update value
-       np[[pp]] = shockp(pp, np[[pp]] , cf$shock_var , cf)
-    }
-
-    np$chain = j
-    ps[[j]] <- np
-  }  
-  return(ps)
-}  
-
-shockp <- function(name,value,shocksd,cf) {
-  sh = rnorm(1,0,shocksd)
-  # update value
-  return(fitMirror( value * (1 + sh/100) ,
-                              LB = cf$pdesc[name,'lb'],
-                              UB = cf$pdesc[name,'ub']))
-}
-
-jumpParams.normalAndMirrored <- function(p,shocksd,VV,params.desc) {
-  sh = rmultnorm(1,rep(0,nrow(VV)),VV) * shocksd
-
-  # update value for each param
-  for (pp in colnames(sh)) {
-    p[[pp]] = fitMirror( p[[pp]] + sh[,pp] ,
-                              LB = params.desc[pp,'lb'],
-                              UB = params.desc[pp,'ub'])  
-  }
-
-  return(p)
-}
-
-list2df <- function(ll) {
- return(ldply(ll,function(l){ return(data.frame(rbind(unlist(l))))}))
-}
 
 
 

@@ -1,3 +1,5 @@
+require(MASS)
+
 #' create an objective function which computes
 #' the distance between simulated means and true means
 #' @param norm_mean 2d vector with the true mean

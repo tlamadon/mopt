@@ -14,6 +14,7 @@ mcf$wd               = getwd()
 mcf$params_to_sample = c('x1','x2')
 mcf$moments_to_use   = c('m1','m2')
 mcf$mode             = 'multicore'
+mcf$iter             = 100
 mcf$algo             = algo.bgp
 
 # set the parameter bounds
@@ -34,4 +35,8 @@ options(mc.cores = detectCores())
 mcf <- prepare.mopt_config(mcf)
 
 # compute slices and generate plots
-res <- runMopt(mcf)
+res = runMOpt(mcf,FALSE)
+
+print(res)
+
+

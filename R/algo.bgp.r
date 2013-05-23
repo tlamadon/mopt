@@ -1,7 +1,7 @@
 #' Baragatti Grimaud and Pommeret MCMC chain
 #' @export
 #' @family algos
-algo.bgp <- function(param_data,rd,cf,N,niter) {
+algo.bgp <- function(chains, last, opts, pdesc, priv) {
 
   # multichain as in Baragatti Grimaud and Pommeret
   # we are going to use N chains with each a different temperiing
@@ -10,49 +10,52 @@ algo.bgp <- function(param_data,rd,cf,N,niter) {
   rr = data.frame()
   ps=list()
 
+  params_to_sample = pdesc$param
+  N                = opts$N
+
   # compute overall variance/covariance matrix
 
-  # if param_data is empty then we accept all
-  if (nrow(param_data)==0) {
-    cf$tempering = seq(100,1,l=N)
-    cf$acc       = seq(0.5,0.5,l=N)
-    cf$shock_var = seq(cf$shock_var,cf$shock_var,l=N)
+  # if chains is empty then we accept all
+  if (nrow(chains)==0) {
+    chain.states$tempering = seq(100,1,l=N)
+    chain.states$acc       = seq(0.5,0.5,l=N)
+    chain.states$shock_var = seq(cf$shock_var,cf$shock_var,l=N)
+    priv = list(chain_states = )
+    return(list(ps = computeInitialCandidates(N,cf), priv=priv))
 
-    return(list(nps = computeInitialCandidates(N,cf) , ndt = rd,cf=cf ))
   } else {
     # select the last 30 * params^2 observations
-    lower_bound_index = pmax(1, nrow(param_data) - 30 * length(cf$params_to_sample))
-    VV = cov(param_data[lower_bound_index:nrow(param_data),cf$params_to_sample])
+    chain.states     = priv$chain.states
+    lower_bound_index = pmax(1, nrow(chains) - 30 * length(params_to_sample))
+    VV = cov(chains[lower_bound_index:nrow(chains),params_to_sample])
   }    
 
   # for each chain, we need the last value, and the new value
-  for (i in 1:N) {
-    # get last realisation for that chain
-    # what is this doing?! looks awful! :-) 
-    # check accept/reject of the new values for each chain, and get new draw. Can we run this part in parallel as well?
-
-    im = which( (param_data$chain == i) & param_data$i == max(param_data$i[param_data$chain==i]))[[1]]
-
-    val_old = param_data[im,]
-    val_new = rd[rd$chain==i,]
+  for (c.current in 1:N) {
+    # for given current chain, find the latest value
+    i.latest = max(subset(chains,chain==c.current)$i)
+    # select latest row
+    val_old = tail(subset(chains, chain==c.current & i==i.latest),1)
+    # create a new row, copy of the old one
+    val_new = val_old
 
     # check for an Energy Ring jump
     if ( 0.05 > runif(1)) {
       # find the list of past values within 10% an energy ring in other chains
-      im2 = which( (param_data$chain != i) &  
-                   (abs(param_data$value - val_old$value)/
-                    abs(param_data$value) <0.1))
+      im2 = which( (chains$chain != c.current) &  
+                   (abs(chains$value - val_old$value)/
+                    abs(chains$value) <0.1))
 
       if (length(im2)>0) {
        im2 = sample(im2,1)
-       val_new = param_data[im2,]
+       val_new = chains[im2,]
        val_new$chain = i
       }
     }
 
-    # check is new value is NA
+    # check if new value is NA
     if (all(rd$chain!=i)) {
-      val_new = val_old
+      val_new  = val_old
       next_val = val_new
       ACC = 0
       prob= 0
@@ -64,7 +67,7 @@ algo.bgp <- function(param_data,rd,cf,N,niter) {
     } else {
 
       # compute accept reject -- classic Metropolis Hasting
-      prob = pmin(1, exp( cf$tempering[i] * (val_old$value - val_new$value)))
+      prob = pmin(1, exp( chain.states$tempering[i] * (val_old$value - val_new$value)))
       if (is.na(prob)) prob = 0; 
 
       # decide on accept reject
@@ -77,13 +80,12 @@ algo.bgp <- function(param_data,rd,cf,N,niter) {
       }
     }
 
-    cat(' value and ratio:', val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,' rate=',cf$acc[i] ,' var=',cf$shock_var[i], '\n')
+    cat(' value and ratio:', val_old$value, '/' ,val_new$value, ' A=', ACC, '-',prob,' rate=',priv$acc[i] ,' var=',priv$shock_var[i], '\n')
     
     # updating sampling variance
-    cf$acc[i] = 0.9*cf$acc[i] + 0.1*ACC
+    chain.states$acc[i]       = 0.9*chain.states$acc[i] + 0.1*ACC
     # increase/decrease by 5%
-    cf$shock_var[i] = cf$shock_var[i] * (1+ 0.05*( 2*(cf$acc[i]>0.234) -1))
-
+    chain.states$shock_var[i] = chain.states$shock_var[i] * (1+ 0.05*( 2*(chain.states$acc[i]>0.234) -1))
 
     # change tempering
     # if (abs(cf$acc - 0.234)<0.1)  cf$tempering  =  cf$tempering  * 1.1
@@ -97,13 +99,13 @@ algo.bgp <- function(param_data,rd,cf,N,niter) {
 
     # then we compute a guess for the chain  
     # pick some parameters to update 
-
-    val_new = shockallp(next_val, cf$shock_var[i], VV, cf)
+    val_new = shockallp(next_val, chain.states$shock_var[i], VV, cf)
 
     ps[[i]] = val_new
   }
  
-   return(list(nps = ps , ndt = rr, cf=cf ))
+  priv = list(chain.states = chain.states)
+  return(list(ps = ps , priv=priv ))
 }
 
 

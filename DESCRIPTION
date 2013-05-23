@@ -18,7 +18,8 @@ Depends:
     ggplot2,
     data.table,
     parallel,
-    minqa
+    minqa,
+    MSBVAR
 LazyLoad: yes
 Collate:
     'mopt-package.r'
@@ -31,3 +32,4 @@ Collate:
     'objfc.norm2.r'
     'fun.slices.r'
     'fun.serialoptim.r'
+    'fun.util.r'
