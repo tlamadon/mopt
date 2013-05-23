@@ -65,8 +65,8 @@ algo.bgp <- function(chains, last, cfg, pdesc, priv) {
     # check that old value is NA!
     } else if (!is.finite(val_old$value)) {
       next_val = val_new
-      ACC = 1
-      prob =1
+      ACC  =0
+      prob =0
     } else {
 
       # compute accept reject -- classic Metropolis Hasting
