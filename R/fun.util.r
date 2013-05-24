@@ -35,7 +35,7 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
     #save evaluations to file
     #save(ps,file='lasteval.dat')
 
-    cat('Sending parameter evaluations...')
+    cat('Sending parameter evaluations...\n')
     if (balance) {
       vals = cf$mylbapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
     } else {
