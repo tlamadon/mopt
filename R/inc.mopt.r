@@ -247,7 +247,9 @@ runMOpt <- function(cf,autoload=TRUE) {
 
     #            step 2, updating chain and computing guesses
     # ----------------------------------------------------------------
+    algo_start = as.numeric(proc.time()[3])
     rr   = mcf$algo(rd,param_data, 0, mcf, mcf$pdesc, priv)
+    algo_time  = as.numeric(proc.time()[3]) - algo_start
     priv = rr$priv
     ps   = rr$ps
 
@@ -256,7 +258,7 @@ runMOpt <- function(cf,autoload=TRUE) {
 
     # small reporting
     # ----------------
-    cat('[',i,'/', cf$iter ,'][', as.numeric(proc.time()[3]), '][', as.numeric(proc.time()[3]) - last_time  , '] best value is ' , min(param_data$value,na.rm=TRUE) ,'\n') 
+    cat('[',i,'/', cf$iter ,'][total:', as.numeric(proc.time()[3]), '][last run:', as.numeric(proc.time()[3]) - last_time  , '][algo:', algo_time , '][mem:',sum(gc()[,"(Mb)"]),'] best value is ' , min(param_data$value,na.rm=TRUE) ,'\n') 
     last_time = as.numeric(proc.time()[3])
     for (pp in paste('p',cf$params_to_sample,sep='.')) {
       cat(' range for ',pp,' ',range(param_data[,pp]),'\n')
