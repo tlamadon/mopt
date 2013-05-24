@@ -237,7 +237,9 @@ runMOpt <- function(cf,autoload=TRUE) {
     cf$i=i
     #                 step 1, evaluate candidates 
     # --------------------------------------------------------
+    eval_start = as.numeric(proc.time()[3])
     rd = evaluateParameters(ps,cf)
+    eval_time  = as.numeric(proc.time()[3]) - eval_start
     if ( (i %% cf$save_freq)==1 & i>10 ) {
       save(param_data,file='evaluations.dat')      
       #save mcf in case of restart
@@ -255,10 +257,18 @@ runMOpt <- function(cf,autoload=TRUE) {
 
     # append the accepted/rejected draws
     param_data = rbind(param_data,rr$evals)
+    run_time = as.numeric(proc.time()[3]) - last_time
 
     # small reporting
     # ----------------
-    cat('[',i,'/', cf$iter ,'][total:', as.numeric(proc.time()[3]), '][last run:', as.numeric(proc.time()[3]) - last_time  , '][algo:', algo_time , '][mem:',sum(gc()[,"(Mb)"]),'] best value is ' , min(param_data$value,na.rm=TRUE) ,'\n') 
+    cat(sprintf('[%d/%d][total: %f][last: %f ( e:%4.2f + a:%4.2f )][m: %f] best value %f \n',
+                  i , cf$iter , 
+                  as.numeric(proc.time()[3]),  
+                  run_time,  
+                  eval_time/run_time,
+                  algo_time/run_time, 
+                  sum(gc()[,"(Mb)"]), 
+                  min(param_data$value,na.rm=TRUE))) 
     last_time = as.numeric(proc.time()[3])
     for (pp in paste('p',cf$params_to_sample,sep='.')) {
       cat(' range for ',pp,' ',range(param_data[,pp]),'\n')
