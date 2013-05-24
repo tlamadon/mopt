@@ -1,3 +1,5 @@
+#' generates different plots from a chain
+#' @export
 plot.mopt_config <- function(mopt,what='all',pd=NA,taildata=0,filename=mopt$file_chain) {
 
   graphs = c('pdistr','ptime','mdistr','pmpoints','pmreg','vtime','mtime','all','mtable')
@@ -185,47 +187,40 @@ cat(STR,file=filename_make)
 
 }
 
-# return some versions of the parameters
-predict.mopt_config <- function(cf,what='p.all') {
+#' return some versions of the parameters
+#' @export
+#' @param what can be 'p.all' the best parameter set as a list, 'p.sd' for 
+#' sampled parameters with standard deviations based on coldest chain, 'm' for list of 
+#' simulated and data moments next to each other
+predict.mopt_config <- function(cf,what='p.all',base='') {
 
   # first type, is to return the parameters with the highest value
-  load(cf$file_chain)
+  load(paste(base,cf$file_chain,sep=''))
   I = which(param_data$value == min(param_data$value,na.rm=TRUE))[[1]]
 
+  params_to_sample  = cf$params_to_sample
+  params_to_sample2 = paste('p',cf$params_to_sample,sep='.')
+  param_data = data.table(param_data)
+
   if (what=='p.all') {
-    pres = c(param_data[I,intersect(cf$params_all,names(param_data))])
-    pres = c(pres,cf$initial_value[ setdiff(names(cf$initial_value),names(pres)) ])
+    pres = cf$initial_value
+    pres[params_to_sample] = param_data[I,params_to_sample2,with=FALSE]
     return(pres)
   } 
-  
-  if (what=='p.free') {
-    p = c(param_data[I,cf$params_to_sample])
-  }
 
   if (what=='p.sd') {
-    VV = sqrt(diag(cov(param_data[param_data$chain==1,cf$params_to_sample])))
-    p = c(param_data[I,cf$params_to_sample])
+    VV = sqrt(diag(cov(param_data[chain==1,params_to_sample2,with=FALSE])))
+    p = c(param_data[I,params_to_sample2,with=FALSE])
     return(data.frame(name = cf$params_to_sample, value = unlist(p), sd = c(VV)))
   }
 
-  if (what=='moments') {
-    mnames = grep('submoments.',names(param_data),value=TRUE)
-    datamnames = grep('submoments.data',names(param_data),value=TRUE)
-    mnames = setdiff(mnames, datamnames)
-    return(param_data[I,mnames])
+  if (what=='m') {
+    mnames      = grep('m\\.',names(param_data),value=TRUE)
+    sim.moments = data.frame(model = as.numeric(param_data[I,mnames,with=FALSE]), moment = str_replace(mnames,'m\\.',''))
+    sim.moments = merge(sim.moments,cf$data.moments,by='moment')
+    return(sim.moments)
   }
 
   return(p)
 }
 
-
-mopt.test <- function() {
-
-  # graph the effect of each paramter on each moment
-  
-
-
-
-
-
-} 
