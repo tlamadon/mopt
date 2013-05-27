@@ -201,6 +201,7 @@ predict.mopt_config <- function(cf,what='p.all',base='') {
   params_to_sample  = cf$params_to_sample
   params_to_sample2 = paste('p',cf$params_to_sample,sep='.')
   param_data = data.table(param_data)
+  cat(sprintf("value=%f evals=%i\n",param_data[I[1]]$value, nrow(param_data)))
 
   if (what=='p.all') {
     pres = cf$initial_value

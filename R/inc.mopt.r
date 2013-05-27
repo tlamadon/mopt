@@ -25,6 +25,7 @@ mopt_config <- function(p) {
  cf$use_last_run   = TRUE
  cf$file_chain     = 'evaluations.dat'
  cf$file_lastparam = 'param_submit.dat'
+ cf$file_errorparam= 'param_error.dat'
  cf$wd             = '~/git/ssp/R/'
  cf$source_on_nodes = 'run.modelest.r'
  cf$params_to_sample = c()	# is that a vector of names or indices? 
