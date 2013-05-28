@@ -242,7 +242,7 @@ runMOpt <- function(cf,autoload=TRUE) {
     rd = evaluateParameters(ps,cf)
     eval_time  = as.numeric(proc.time()[3]) - eval_start
     if ( (i %% cf$save_freq)==1 & i>10 ) {
-      save(param_data,file='evaluations.dat')      
+      save(cf,priv,param_data,file=cf$file_chain)      
       #save mcf in case of restart
       mmcf=cf
       save(mmcf,file='cf.dat')
@@ -277,7 +277,7 @@ runMOpt <- function(cf,autoload=TRUE) {
   }
 
   #saving the data set
-  save(param_data,file='evaluations.dat')  
+  save(cf,priv,param_data,file=cf$file_chain)      
 
   # stopping the cluster using R snow command
   #if (cf$USE_MPI) {
