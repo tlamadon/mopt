@@ -24,6 +24,10 @@ The parallelisation overhead is relatively costly, and so I would not recommend 
 Wang, F. and Landau, D. Physical Review E  64  056101  (2001)
  - ["An MCMC approach to classical estimation"](http://papers.ssrn.com/sol3/papers.cfm?abstract_id=420371) Chernozhukov and Hong.
  
+### Install
+
+    install.packages('devtools');require(devtools);install_github('mopt',user='tlamadon')
+
 ### Contributors
 
  - [Ran Gu](https://github.com/lionup)
