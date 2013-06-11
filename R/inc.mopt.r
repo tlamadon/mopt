@@ -39,7 +39,7 @@ mopt_config <- function(p) {
  cf$save_freq      = 25
  cf$initial_value  = p	
  cf$params_all     = names(p) #c('sep','c','b','s0','s1','firmMass','beta','delta','sigma','f_rho','f_mx','f_my','f_a')
-
+ cf$N = 3 #default in case of serial
 
  param.descript = data.frame()
  for (n in names(p)) {
@@ -168,7 +168,6 @@ prepare.mopt_config <- function(cf) {
     cat('[mode=serial] NOT USING MPI !!!!! \n')    
     cf$mylapply  = lapply;
     cf$mylbapply = lapply;
-    cf$N=3
   }
   return(cf)
 }
