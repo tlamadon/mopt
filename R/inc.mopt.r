@@ -130,6 +130,8 @@ prepare.mopt_config <- function(cf) {
     require(snow)  
     # creating the cluster
     cl <- makeCluster(type='MPI')
+	cf$cl <- cl	# add cluster to the config as well
+
 	# we are hard coding the name of the cluster here
 	# as long as we always use the same name, that's fine.
 	  # worker roll call

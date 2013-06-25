@@ -37,7 +37,7 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
 
     cat('Sending parameter evaluations...\n')
 	if (cf$mode=='mpi'){
-		vals <- parLapply(cl,ps,mopt_obj_wrapper,objfunc = cf$objfunc)
+		vals <- parLapply(cf$cl,ps,mopt_obj_wrapper,objfunc = cf$objfunc)
 	} else if (balance) {
 		vals = cf$mylbapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
 	} else {
