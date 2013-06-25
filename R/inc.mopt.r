@@ -128,7 +128,7 @@ prepare.mopt_config <- function(cf) {
     cat('[mode=mpi] USING MPI !!!!! \n')
     require(snow)  
     # creating the cluster
-    cl <- makeCluster()
+    cl <- snow::makeCluster()
 	  # worker roll call
 	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
     dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
