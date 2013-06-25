@@ -1,5 +1,6 @@
 # generate slices for a model
 require(mopt)
+library(ggplot2)
 
 # let's take a dummy objective function
 MOPT_OBJ_FUNC <- objfc.norm2(c(0,0),ns=2000)
@@ -38,7 +39,7 @@ mcf <- prepare.mopt_config(mcf)
 # compute slices and generate plots
 res = runMOpt(mcf,FALSE)
 
-ggplot(res,aes(x=p.x1,y=p.x2)) + geom_point() + facet_wrap(~chain) +theme_bw()
+ggplot(res,aes(x=p.x1,y=p.x2)) + geom_point() + facet_wrap(~chain) + theme_bw()
 
 print(res)
 

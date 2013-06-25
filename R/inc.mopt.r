@@ -26,10 +26,10 @@ mopt_config <- function(p) {
  cf$file_chain     = 'evaluations.dat'
  cf$file_lastparam = 'param_submit.dat'
  cf$file_errorparam= 'param_error.dat'
- cf$wd             = '~/git/ssp/R/'
- cf$source_on_nodes = 'run.modelest.r'
- cf$params_to_sample = c()	# is that a vector of names or indices? 
-                                #This is a vector of names: c('delta', 'b')
+ cf$wd             = '~/git/bankruptcy/R'
+ cf$source_on_nodes = 'example-bgp-mpi-slaves.r'
+ cf$params_to_sample = c()	#This is a vector of names: c('delta', 'b')
+                                
  cf$run            = 0
  cf$shock_var      = 0.1
  cf$moments_to_use = c()
@@ -129,9 +129,16 @@ prepare.mopt_config <- function(cf) {
     require(snow)  
     # creating the cluster
     cl <- makeCluster()
+	  # worker roll call
+	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
+    dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
+	  cat("Master: I've got",num.worker,"workers\n")
+	  cat("Master: doing rollcall on cluster now\n")
+	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$wd,"workers","rollcall.txt"),append=FALSE)
     # setting up the slaves
     eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
     eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
+    clusterCall(cl, rollcall, file.path(cf$wd,"workers"))
 
     # adding the normal lapply
     cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
@@ -147,9 +154,16 @@ prepare.mopt_config <- function(cf) {
     if(Sys.info()[['sysname']]=='Windows') {
       cl <- makeCluster(detectCores())
       
+      # worker roll call
+      dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
+      cat("Master: I've got",num.worker,"workers\n")
+      cat("Master: doing rollcall on cluster now\n")
+      cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$wd,"workers","rollcall.txt"),append=FALSE)
       # setting up the slaves
       eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
       eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
+      clusterCall(cl, rollcall, file.path(cf$wd,"workers"))
+      
       
       # adding the normal lapply
       cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
@@ -171,6 +185,19 @@ prepare.mopt_config <- function(cf) {
   }
   return(cf)
 }
+
+#' cluster rollcall
+#' 
+#' cluster reporting function. makes every worker state their name and 
+#' writes into a log file
+#' @export
+#' @param dir path to the log directory
+rollcall <- function(dir){
+  my.name <- Sys.info()["nodename"]
+  cat("I am",my.name,"and I'm ready to go.\n",file=file.path(dir,"rollcall.txt"),append=TRUE)
+}
+
+
 
 #' this is the main function, it will run the
 #' optimizer in parallel if called with MPI=TRUE
