@@ -29,6 +29,7 @@ mopt_config <- function(p) {
  cf$wd             = '~/git/bankruptcy/R'
  cf$source_on_nodes = 'example-bgp-mpi-slaves.r'
  cf$params_to_sample = c()	#This is a vector of names: c('delta', 'b')
+ cf$objfunc          = MOPT_OBJ_FUNC
                                 
  cf$run            = 0
  cf$shock_var      = 0.1
