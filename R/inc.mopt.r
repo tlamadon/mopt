@@ -128,7 +128,7 @@ prepare.mopt_config <- function(cf) {
     cat('[mode=mpi] USING MPI !!!!! \n')
     require(snow)  
     # creating the cluster
-    cl <- snow::makeCluster()
+    cl <- makeCluster(type='MPI')
 	  # worker roll call
 	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
     dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
@@ -152,7 +152,7 @@ prepare.mopt_config <- function(cf) {
     require(parallel)
     
     if(Sys.info()[['sysname']]=='Windows') {
-      cl <- makeCluster(detectCores())
+      cl <- makeCluster(spec=detectCores(),type='MPI')
       
       # worker roll call
       dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
