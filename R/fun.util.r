@@ -36,11 +36,13 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
     #save(ps,file='lasteval.dat')
 
     cat('Sending parameter evaluations...\n')
-    if (balance) {
-      vals = cf$mylbapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
-    } else {
-      vals = cf$mylapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
-    }
+	if (cf$mode=='mpi'){
+		vals <- parLapply(cl,ps,mopt_obj_wrapper,objfunc = cf$objfunc)
+	} else if (balance) {
+		vals = cf$mylbapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
+	} else {
+	    vals = cf$mylapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
+	}
     cat('done\n')
 
     # process the return values 1 by 1

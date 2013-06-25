@@ -130,6 +130,8 @@ prepare.mopt_config <- function(cf) {
     require(snow)  
     # creating the cluster
     cl <- makeCluster(type='MPI')
+	# we are hard coding the name of the cluster here
+	# as long as we always use the same name, that's fine.
 	  # worker roll call
 	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
     dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
