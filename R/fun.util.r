@@ -64,6 +64,10 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
       names(pt) <- paste('p',names(pt),sep='.')
       rd  = data.frame(pt)
 
+	  if (nrow(rd)>1){
+		  stop('your parameter list converts to a dataframe with multiple rows. probably you have a nested list. please remove.')
+	}
+
       rd$value  = val$value
       rd$status = val$status
       rd$time   = val$time
@@ -75,8 +79,8 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
         colnames(rd.infos) <- paste('d',colnames(rd.infos),sep='.')
         rd = cbind(rd,rd.infos)
       }
-
-      # get the moments
+      
+	  # get the moments
       if (!is.null(val$sm) & nrow(val$sm)>0) {
         rd.sm = val$sm$value
         names(rd.sm) = paste('m',val$sm$names,sep='.')
