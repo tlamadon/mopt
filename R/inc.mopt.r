@@ -151,7 +151,11 @@ prepare.mopt_config <- function(cf) {
     # adding the load balanced lapply
     cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
 
-    cf$N = length(cl)
+    # cf$N = length(cl)
+	# TODO
+	# N is the number of chains. This need not be necessarily the number of cores/nodes available.
+	# for example suppose computation of the objective function requires
+	# 2 cores: so then we'll have N chains which requires a cluster with 2*N cores
   } else if (cf$mode=='multicore') {
     cat('[mode=mulicore] YEAH !!!!! \n')    
     require(parallel)
@@ -245,7 +249,7 @@ runMOpt <- function(cf,autoload=TRUE) {
     cf$i      = 1
   }
 
-  cat('Number of nodes: ',cf$N,'\n')
+  cat('Number of Chains: ',cf$N,'\n')
 
   # we want to keep a matrix for the chain
   # it should be a data.frame in long format
