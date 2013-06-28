@@ -127,8 +127,10 @@ mopt_obj_wrapper <- function(p,objfunc=NA) {
 prepare.mopt_config <- function(cf) {
   if (cf$mode=='mpi') {
     cat('[mode=mpi] USING MPI !!!!! \n')
-    require(snow)  
+
     # creating the cluster
+	# size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
+    require(snow)  
     cl <- makeCluster(type='MPI')
 	cf$cl <- cl	# add cluster to the config as well
 
@@ -136,7 +138,7 @@ prepare.mopt_config <- function(cf) {
 	# as long as we always use the same name, that's fine.
 	  # worker roll call
 	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
-    dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
+      dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
 	  cat("Master: I've got",num.worker,"workers\n")
 	  cat("Master: doing rollcall on cluster now\n")
 	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$wd,"workers","rollcall.txt"),append=FALSE)
