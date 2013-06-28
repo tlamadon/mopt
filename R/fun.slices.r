@@ -45,9 +45,10 @@ compute.slices <- function(mcf,ns=30,pad=0.1) {
       ptmp$chain=j
       ps[[j]] = ptmp
     }
-
+  
+    
     cat('sending evaluations for ',pp,' in (', lb+(ub-lb)*pad/2,',',lb+(ub-lb)*(1-pad/2),')\n')
-    rs = mcf$mylbapply(ps,mopt_obj_wrapper)
+    rs = mcf$mylbapply(ps,mopt_obj_wrapper,objfunc=mcf$objfunc)
 
     rr1 = data.frame()
     for ( jj in 1:length(rs) ) {
@@ -85,11 +86,19 @@ compute.slices <- function(mcf,ns=30,pad=0.1) {
   return(res)
 }
 
+#' plot.slices
+#'
 #' generates plots for each moments/parameter combinations
 #' @param path path where to put the plots
+#' @param p list of ALL parameters
+#' @param mcf mopt configuration of a model
 #' @export
 plot.slices <- function(p,mcf,path='') {
   # we want to keep all submoments, value, param and param_value
+  if (!file.exists('est.slices.dat')){
+	  cat('cannot find file est.slices.dat. you must call compute.slices first')
+	  return(NULL)
+  }
   load('est.slices.dat')
   nn = names(rr)
   rr$conv=rr$status>0
