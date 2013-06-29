@@ -63,6 +63,7 @@ compute.slices <- function(mcf,ns=30,pad=0.1,path=NULL) {
 
     rr1 = data.frame()
     for ( jj in 1:length(rs) ) {
+      if (is.atomic(rs[[jj]])) next;
       if (is.null(rs[[jj]]))   next;
       if (rs[[jj]]$status==-1) next;
 
