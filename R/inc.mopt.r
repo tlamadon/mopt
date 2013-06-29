@@ -28,6 +28,7 @@ mopt_config <- function(p) {
  cf$file_errorparam= 'param_error.dat'
  cf$wd             = '~/git/bankruptcy/R'
  cf$source_on_nodes = 'example-bgp-mpi-slaves.r'
+ cf$logdir         = 'sims/sim2/workers'	# log directory relative to cf$wd
  cf$params_to_sample = c()	#This is a vector of names: c('delta', 'b')
  cf$objfunc          = MOPT_OBJ_FUNC
                                 
@@ -95,36 +96,8 @@ datamoments <- function(names,values,sds) {
  return(cf)
 }
 
-mopt_obj_wrapper <- function(p,objfunc=NA) {
-  m = try( {
-
-    # get result
-    r = objfunc(p)  
-
-    if (!is.list(r)) {
-      r = list(value=r)
-    }
-
-    # check that there is a status 
-    # and that values is not NA
-    if (!('status' %in% names(r))) { 
-      r$status=1
-    }
-
-    if (is.nan(r$value) | is.na(r$value)) {
-      r$status=-1
-	  stop("objective function produced NA")
-    }
-	return(r)
-
-  },silent=TRUE) 
-  return(m) 
-  # returns NA if there is any sort of crash
-  # later it would be good to get the error message
-}
-
 # mopt_obj_wrapper <- function(p,objfunc=NA) {
-#   m = tryCatch( {
+#   m = try( {
 # 
 # get result
 #     r = objfunc(p)  
@@ -141,16 +114,44 @@ mopt_obj_wrapper <- function(p,objfunc=NA) {
 # 
 #     if (is.nan(r$value) | is.na(r$value)) {
 #       r$status=-1
+#       stop("objective function produced NA")
 #     }
+#     return(r)
 # 
-#     r
-#   },error = function(e) {
-#     list(status=-1,error=e$message)
-#   } ) 
+#   },silent=TRUE) 
 #   return(m) 
 # returns NA if there is any sort of crash
 # later it would be good to get the error message
-# }
+#  }
+
+mopt_obj_wrapper <- function(p,objfunc=NA) {
+	m = tryCatch( {
+
+		#         get result
+		r = objfunc(p)  
+
+		if (!is.list(r)) {
+			r = list(value=r)
+		}
+
+		#         check that there is a status 
+		#         and that values is not NA
+		if (!('status' %in% names(r))) { 
+			r$status=1
+		}
+
+		if (is.nan(r$value) | is.na(r$value)) {
+			r$status=-1
+		}
+
+		r
+	},error = function(e) {
+		list(status=-1,error=e$message)
+	} ) 
+	return(m) 
+	#     returns NA if there is any sort of crash
+	#     later it would be good to get the error message
+}
 
 
 
@@ -170,14 +171,14 @@ prepare.mopt_config <- function(cf) {
 	# as long as we always use the same name, that's fine.
 	  # worker roll call
 	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
-      dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
+      dir.create(file.path(cf$wd,cf$logdir),showWarnings=FALSE)
 	  cat("Master: I've got",num.worker,"workers\n")
 	  cat("Master: doing rollcall on cluster now\n")
-	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$wd,"workers","rollcall.txt"),append=FALSE)
+	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$wd,cf$logdir,"rollcall.txt"),append=FALSE)
     # setting up the slaves
     eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
     eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
-    clusterCall(cl, rollcall, file.path(cf$wd,"workers"))
+    clusterCall(cl, rollcall, file.path(cf$wd,cf$logdir))
 
     # adding the normal lapply
     cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
