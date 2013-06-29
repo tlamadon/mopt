@@ -52,7 +52,7 @@ compute.slices <- function(mcf,ns=30,pad=0.1) {
     cat('sending evaluations for ',pp,' in (', lb+(ub-lb)*pad/2,',',lb+(ub-lb)*(1-pad/2),')\n')
     
 	if (mcf$mode =='mpi'){
-		rs = clusterApplyLB(cl=mcf$cl,x=unlist(ps),fun=mopt_obj_wrapper,objfunc=mcf$objfunc)
+		rs = clusterApplyLB(cl=mcf$cl,x=ps,fun=mopt_obj_wrapper,objfunc=mcf$objfunc)
 	} else {
 		rs = mcf$mylbapply(ps,mopt_obj_wrapper,objfunc=mcf$objfunc)
 	}
