@@ -38,9 +38,13 @@ mopt_config <- function(p) {
  cf$moments.sd     = c()
  cf$np_shock       = 1
  cf$save_freq      = 25
- cf$initial_value  = p	
+ cf$initial_value  = p
  cf$params_all     = names(p) #c('sep','c','b','s0','s1','firmMass','beta','delta','sigma','f_rho','f_mx','f_my','f_a')
- cf$N = 3 #default in case of serial
+ cf$N              = 3 # default in case of serial
+ cf$mcfactor       = 1L # multicore factor on MPI cluster: if you have N chains which require (intermediate, private) multicore computation
+                        # you set this to the number of cores required by each chain.
+                        # for example, each chain requires 2 cores to compute the objective function: cf$mcfactor = 2
+                        # if you reserved N MPI cores, this will start off only N / cf$mcfactor
 
  param.descript = data.frame()
  for (n in names(p)) {
@@ -92,7 +96,7 @@ datamoments <- function(names,values,sds) {
 }
 
 mopt_obj_wrapper <- function(p,objfunc=NA) {
-  m = tryCatch( {
+  m = try( {
 
     # get result
     r = objfunc(p)  
@@ -109,16 +113,44 @@ mopt_obj_wrapper <- function(p,objfunc=NA) {
 
     if (is.nan(r$value) | is.na(r$value)) {
       r$status=-1
+	  stop("objective function produced NA")
     }
+	return(r)
 
-    r
-  },error = function(e) {
-    list(status=-1,error=e$message)
-  } ) 
+  },silent=TRUE) 
   return(m) 
   # returns NA if there is any sort of crash
   # later it would be good to get the error message
 }
+
+# mopt_obj_wrapper <- function(p,objfunc=NA) {
+#   m = tryCatch( {
+# 
+# get result
+#     r = objfunc(p)  
+# 
+#     if (!is.list(r)) {
+#       r = list(value=r)
+#     }
+# 
+# check that there is a status 
+# and that values is not NA
+#     if (!('status' %in% names(r))) { 
+#       r$status=1
+#     }
+# 
+#     if (is.nan(r$value) | is.na(r$value)) {
+#       r$status=-1
+#     }
+# 
+#     r
+#   },error = function(e) {
+#     list(status=-1,error=e$message)
+#   } ) 
+#   return(m) 
+# returns NA if there is any sort of crash
+# later it would be good to get the error message
+# }
 
 
 
@@ -153,7 +185,8 @@ prepare.mopt_config <- function(cf) {
     # adding the load balanced lapply
     cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
 
-    # cf$N = length(cl)
+	stopifnot(is.integer(cf$mcfactor))
+	cf$N = floor(length(cl) / cf$mcfactor)
 	# TODO
 	# N is the number of chains. This need not be necessarily the number of cores/nodes available.
 	# for example suppose computation of the objective function requires

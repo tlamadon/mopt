@@ -29,6 +29,16 @@ checkEvalStructure <- function(val,cf) {
   if (length(missing)>0) cat(paste(missing, collapse=', '), ' are missing from return value of objective function\n')
 }
 
+
+#' Evaluate objective function at N candidate parameter vectors
+#'
+#' Evaluates the objective function at N different value of the parameter vector.
+#' Depending on the configuration given in cf, evaluation is serial, parallel using multicore, 
+#' or using MPI on a cluster.
+#' @param ps list of length N. each component is another list representing a particular value
+#' of the parameter vector.
+#' @param cf an object of class mopt_config
+#' @return a data.frame
 #' @export
 evaluateParameters <- function(ps,cf,balance=FALSE) {
     
@@ -37,8 +47,8 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
 
     cat('Sending parameter evaluations...\n')
 	if (cf$mode=='mpi'){
-		#         vals <- parLapply(cf$cl,ps,mopt_obj_wrapper,objfunc = cf$objfunc)
-		vals <- parLapply(cf$cl,1:length(ps),function(j) mopt_obj_wrapper(ps[[j]],objfunc=cf$objfunc))
+		vals <- parLapply(cf$cl,ps,mopt_obj_wrapper,objfunc = cf$objfunc)
+		#         vals <- parLapply(cf$cl,1:length(ps),function(j) mopt_obj_wrapper(ps[[j]],objfunc=cf$objfunc))
 	} else if (balance) {
 		vals = cf$mylbapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
 	} else {
@@ -112,6 +122,15 @@ getParamStructure <- function() {
   return(param.descript)
 }
 
+#' Compute Initial Parameter Candidates
+#'
+#' for a given MOPT configuration, compute N starting values. A starting value is a disturbation of
+#' the supplied starting parameter vector p. This way we generate one starting value for each of N chains.
+#' The chains differ in that in each chain a different subset of parameters from the initial parameter 
+#' vector is randomly disturbed.
+#' @param N number of chains
+#' @param cf an object of class mopt_config; a list 
+#' @return a list of length N, each containing a randomly perturbed version of starting vector p.
 #' @export
 computeInitialCandidates <- function(N,cf) {
   ps = list()
