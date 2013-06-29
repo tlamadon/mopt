@@ -99,8 +99,9 @@ compute.slices <- function(mcf,ns=30,pad=0.1) {
 #' @param path path where to put the plots
 #' @param p list of ALL parameters
 #' @param mcf mopt configuration of a model
+#' @param type string indicating file type to save plot as. currently png and pdf only.
 #' @export
-plot.slices <- function(p,mcf,path='') {
+plot.slices <- function(p,mcf,path='',type="png") {
   # we want to keep all submoments, value, param and param_value
   if (!file.exists('est.slices.dat')){
 	  cat('cannot find file est.slices.dat. you must call compute.slices first')
@@ -127,7 +128,8 @@ plot.slices <- function(p,mcf,path='') {
       facet_wrap(~param,scales='free_x',ncol=3) +
       scale_y_continuous(paste('value of',pp))+ scale_x_continuous('varying parameter') + theme_bw()
     #print(gp)
-    ggsave(paste(path,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
+    if (type=="png") ggsave(paste(path,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
+    if (type=="pdf") ggsave(paste(path,'plot_ParamVsMoment_',pp,'.pdf',sep=''),width=10.6, height=5.93)
   }
 
   pp ='value'
@@ -137,5 +139,6 @@ plot.slices <- function(p,mcf,path='') {
       facet_wrap(~param,scales='free_x',ncol=3) +
       scale_y_continuous('objective function')+ scale_x_continuous('varying parameter') + theme_bw()
     #print(gp)
-    ggsave(paste(path,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
+    if (type=="png") ggsave(paste(path,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
+    if (type=="pdf") ggsave(paste(path,'plot_ParamVsMoment_',pp,'.pdf',sep=''),width=10.6, height=5.93)
  }

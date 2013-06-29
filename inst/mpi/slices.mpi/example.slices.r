@@ -36,4 +36,7 @@ res <- compute.slices(mcf,ns=30,pad=0.1)
 
 print(res)
 
+# plot slices
+plot.slices(p,mcf)
+
 stopCluster(mcf$cl)
