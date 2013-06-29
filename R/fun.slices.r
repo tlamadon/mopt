@@ -4,9 +4,13 @@
 #' starting value and store all values. By default
 #' it will run for all parameters, otherwise it uses
 #' the argument list
+#' @param mcf object of class mopt
+#' @param ns numeric number of points in each dimension to evaluate
+#' @param pad spacing parameter
+#' @param path file path relative to getwd() where to save files
 #' @export
 #' @example examples/example-slices.r
-compute.slices <- function(mcf,ns=30,pad=0.1) {
+compute.slices <- function(mcf,ns=30,pad=0.1,path=NULL) {
 
   # reading configuration
   # =====================
@@ -85,7 +89,11 @@ compute.slices <- function(mcf,ns=30,pad=0.1) {
 
   }
 
-  save(rr,file='est.slices.dat')
+  if (is.null(path)){
+	  save(rr,file='est.slices.dat')
+  } else {
+	  save(rr,file=file.path(mcf$wd,path,'est.slices.dat'))
+  }
   res = list()
   res$p.start = p2
   res$v.start = maxres
