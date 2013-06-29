@@ -48,7 +48,9 @@ compute.slices <- function(mcf,ns=30,pad=0.1) {
   
     
     cat('sending evaluations for ',pp,' in (', lb+(ub-lb)*pad/2,',',lb+(ub-lb)*(1-pad/2),')\n')
-    rs = mcf$mylbapply(ps,mopt_obj_wrapper,objfunc=mcf$objfunc)
+	#     rs = mcf$mylbapply(ps,mopt_obj_wrapper,objfunc=mcf$objfunc)
+	#     rs = mcf$mylbapply(unlist(ps),mopt_obj_wrapper,objfunc=mcf$objfunc)
+    rs = clusterApplyLB(cl=mcf$cl,x=unlist(ps),FUN=mopt_obj_wrapper,objfunc=mcf$objfunc)
 
     rr1 = data.frame()
     for ( jj in 1:length(rs) ) {
