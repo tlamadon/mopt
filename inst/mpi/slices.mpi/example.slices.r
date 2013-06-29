@@ -33,3 +33,7 @@ mcf <- prepare.mopt_config(mcf)
 
 # compute slices and generate plots
 res <- compute.slices(mcf,ns=30,pad=0.1)
+
+print(res)
+
+stopCluster(mcf$cl)
