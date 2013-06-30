@@ -1,3 +1,4 @@
+
 #' Compute the objective function on a grid
 #' 
 #' Will vary each parameter independently from the 
@@ -6,7 +7,7 @@
 #' the argument list
 #' @param mcf object of class mopt
 #' @param ns numeric number of points in each dimension to evaluate
-#' @param pad spacing parameter
+#' @param padding from bounds of parameter ranges. e.g. p in [0,1], avoid 0 and 1 with pad>0.
 #' @param path file path relative to getwd() where to save files
 #' @export
 #' @example examples/example-slices.r
@@ -91,9 +92,9 @@ compute.slices <- function(mcf,ns=30,pad=0.1,path=NULL) {
   }
 
   if (is.null(path)){
-	  save(rr,file='est.slices.dat')
+	  save(rr,mcf,file='est.slices.RData')
   } else {
-	  save(rr,file=file.path(mcf$wd,path,'est.slices.dat'))
+	  save(rr,mcf,file=file.path(mcf$wd,path,'est.slices.RData'))
   }
   res = list()
   res$p.start = p2
@@ -105,19 +106,23 @@ compute.slices <- function(mcf,ns=30,pad=0.1,path=NULL) {
 #' plot.slices
 #'
 #' generates plots for each moments/parameter combinations
-#' @param path path where to put the plots
-#' @param p list of ALL parameters
-#' @param mcf mopt configuration of a model
+#' depends on output of function compute.slices(), which saves
+#' a dataframe with plotting data and the used mopt config into a 
+#' a file \code{est.slices.RData}
+#' @param file path/to/est.slices.RData if not in getwd()
+#' @param outpath path to directory where to save plots
 #' @param type string indicating file type to save plot as. currently png and pdf only.
 #' @export
-plot.slices <- function(p,mcf,path='',type="png") {
+plot.slices <- function(file=NULL,outpath='',type="png") {
   # we want to keep all submoments, value, param and param_value
-  if (!file.exists('est.slices.dat')){
-	  cat('cannot find file est.slices.dat. you must call compute.slices first')
-	  return(NULL)
-  }
-  load('est.slices.dat')
-  nn = names(rr)
+
+	if (is.null(inpath)) {
+		load('est.slices.RData')
+	} else {
+		load(file)
+	}
+  
+	nn = names(rr)
   rr$conv=rr$status>0
   
   rr.m = melt(rr,id=c('param','param_value','conv'))
@@ -137,8 +142,8 @@ plot.slices <- function(p,mcf,path='',type="png") {
       facet_wrap(~param,scales='free_x',ncol=3) +
       scale_y_continuous(paste('value of',pp))+ scale_x_continuous('varying parameter') + theme_bw()
     #print(gp)
-    if (type=="png") ggsave(paste(path,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
-    if (type=="pdf") ggsave(paste(path,'plot_ParamVsMoment_',pp,'.pdf',sep=''),width=10.6, height=5.93)
+    if (type=="png") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
+    if (type=="pdf") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.pdf',sep=''),width=10.6, height=5.93)
   }
 
   pp ='value'
@@ -148,6 +153,6 @@ plot.slices <- function(p,mcf,path='',type="png") {
       facet_wrap(~param,scales='free_x',ncol=3) +
       scale_y_continuous('objective function')+ scale_x_continuous('varying parameter') + theme_bw()
     #print(gp)
-    if (type=="png") ggsave(paste(path,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
-    if (type=="pdf") ggsave(paste(path,'plot_ParamVsMoment_',pp,'.pdf',sep=''),width=10.6, height=5.93)
+    if (type=="png") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
+    if (type=="pdf") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.pdf',sep=''),width=10.6, height=5.93)
  }
