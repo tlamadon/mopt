@@ -31,6 +31,7 @@ mopt_config <- function(p) {
  cf$logdir         = 'sims/sim2/workers'	# log directory relative to cf$wd
  cf$params_to_sample = c()	#This is a vector of names: c('delta', 'b')
  cf$objfunc          = MOPT_OBJ_FUNC
+ cf$modelinfo      = c()
                                 
  cf$run            = 0
  cf$shock_var      = 0.1
