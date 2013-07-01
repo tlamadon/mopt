@@ -12,6 +12,7 @@ objfc.norm2 <- function(mu=c(0,0),sigma=diag(2),ns=50) {
 
   obj <- function(p,ms=c()) {
 
+	  t1 <- proc.time()[3]
 	  stopifnot(is.list(p))	# we require p be a list
 
 	  # simulate moments 
@@ -29,7 +30,7 @@ objfc.norm2 <- function(mu=c(0,0),sigma=diag(2),ns=50) {
 	    status = 1,
 	    sm     = sm,
 	    infos  = list(),
-	    time   = 0)
+	    time   = as.numeric(proc.time()[3] - t1))
 
 	   return(res)
    }
