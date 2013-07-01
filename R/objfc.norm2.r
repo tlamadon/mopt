@@ -23,13 +23,16 @@ objfc.norm2 <- function(mu=c(0,0),sigma=diag(2),ns=50) {
 	  sm  =data.frame(names=c('m1','m2'),value=moments)
 	  sm$names = paste(sm$names)
 
+	  nname <- Sys.info()["nodename"]
+	  names(nname) <- NULL
+
 	  res = list(
 	    p      = p,
 	    chain  = p$chain,
 	    value  = value,
 	    status = 1,
 	    sm     = sm,
-	    infos  = list(),
+	    infos  = list(node=nname),
 	    time   = as.numeric(proc.time()[3] - t1))
 
 	   return(res)

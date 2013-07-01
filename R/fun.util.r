@@ -87,7 +87,7 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
       # collect the addititonal infos
       if (length(val$infos)>0) {
         rd.infos = data.frame(val$infos)
-        colnames(rd.infos) <- paste('d',colnames(rd.infos),sep='.')
+        colnames(rd.infos) <- paste('d',colnames(rd.infos),sep='.')	# what does the prefix '.d' mean?
         rd = cbind(rd,rd.infos)
       }
       
