@@ -154,6 +154,25 @@ mopt_obj_wrapper <- function(p,objfunc=NA) {
 	#     later it would be good to get the error message
 }
 
+mopt_obj_wrapper_custom <- function(p,objfunc=NA) {
+	m = tryCatch( {
+
+		#         get result
+		r = objfunc(p)  
+
+		if (!is.list(r)) {
+			stop('MOPT_OBJ_FUNC must return a list')
+		}
+
+		if (!('output' %in% names(r))){
+			stop('MOPT_OBJ_FUNC must return a list with an element named: output')
+		}
+		r
+	},error = function(e) {
+		list(status=-1,error=e$message)
+	} ) 
+	return(m) 
+}
 
 
 #' prepares mopt to run with either MPI or openMP or just serial

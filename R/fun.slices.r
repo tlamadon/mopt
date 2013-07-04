@@ -232,12 +232,10 @@ compute.slices2 <- function(mcf,ns=30,pad=0.1,path=NULL) {
     
     cat('sending evaluations for ',pp,' in (', lb+(ub-lb)*pad/2,',',lb+(ub-lb)*(1-pad/2),')\n')
     
-	# NOTE
-    #	watch out: had to remove the wrapper as non-standard form of obj fun output!
 	if (mcf$mode =='mpi'){
-		rs = clusterApplyLB(cl=mcf$cl,x=ps,fun=mcf$objfunc)
+		rs = clusterApplyLB(cl=mcf$cl,x=ps,fun=mopt_obj_wrapper_custom,objfunc=mcf$objfunc)
 	} else {
-		rs = mcf$mylbapply(ps,mcf$objfunc)
+		rs = mcf$mylbapply(ps,mopt_obj_wrapper_custom,objfunc=mcf$objfunc)
 	}
 
 	# get model output for each parameter value

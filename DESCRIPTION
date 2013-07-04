@@ -33,3 +33,4 @@ Collate:
     'fun.slices.r'
     'fun.serialoptim.r'
     'fun.util.r'
+    'objfc.norm2.custom.r'
