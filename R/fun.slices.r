@@ -1,14 +1,17 @@
 
-#' Compute the objective function on a grid
+#' Compute the objective function on a grid of params and show simulated moments
 #' 
-#' Will vary each parameter independently from the 
-#' starting value and store all values. By default
-#' it will run for all parameters, otherwise it uses
-#' the argument list
+#' Will vary each parameter independently in a chosen range and report the value 
+#' of the resulting simulated moments in relation to the moments in the data.
+#' Can be used to construct a heuristic identification argument. Basically it can 
+#' be seen which parameter affects which dimension of the model output, i.e. which 
+#' simulated moment.
 #' @param mcf object of class mopt
-#' @param ns numeric number of points in each dimension to evaluate
-#' @param padding from bounds of parameter ranges. e.g. p in [0,1], avoid 0 and 1 with pad>0.
-#' @param path file path relative to getwd() where to save files
+#' @param ns number of points in each dimension to evaluate
+#' @param pad from bounds of parameter ranges. e.g. p in [0,1], avoid 0 and 1 with pad>0.
+#' @param path file path relative to \code{getwd()} where to save files
+#' @return list with info and a data.frame \code{slices} summarizing all information of the exercise: parameter values, 
+#' simulated moments, data moments. Input to \code{\link{plot.slices(slices)}}.
 #' @export
 #' @example examples/example-slices.r
 compute.slices <- function(mcf,ns=30,pad=0.1,path=NULL) {
@@ -156,3 +159,108 @@ plot.slices <- function(file=NULL,outpath='',type="png") {
     if (type=="png") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
     if (type=="pdf") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.pdf',sep=''),width=10.6, height=5.93)
  }
+
+
+
+#' Compute the objective function on a grid of params and show custom model output
+#' 
+#' Essentially the same as \code{\link{compute.slices}}, but does not report simulated 
+#' moments but other model output. Useful for model output that is multidimensional. 
+#' It's a simplified version of \code{\link{compute.slices}} in that it does not further
+#' process the model output: it return a list with nests "parameter name", "value of parameter",
+#' "model output".
+#' For example instead of reporting the mean of a certain statistic, this function can
+#' return a matrix or a higher dimensional array. Say you want to return the life-cycle
+#' profile of a certain model variable x. This will be a vector of length N, where N is 
+#' the number of periods in the model. The user has to design the MOPT_OBJ_FUN in such a way
+#' that it returns the required output. There are 2 requirements for what \code{MOPT_OBJ_FUN} has to return.
+#' First it has to be a list, second, the list needs components "status" (indicating whether a particular evaluation
+#' is valid in some sense) and "output", which contains your custom model output.
+#' @param mcf object of class mopt
+#' @param ns number of points in each dimension to evaluate
+#' @param pad from bounds of parameter ranges. e.g. p in [0,1], avoid 0 and 1 with pad>0.
+#' @param path file path relative to \code{getwd()} where to save files
+#' @return list by paramter name, parameter value index, containing the value of the parameter vector and a list \code{data} containing
+#' your custom model output.
+#' @export
+#' @example examples/example-slices2.r
+compute.slices2 <- function(mcf,ns=30,pad=0.1,path=NULL) {
+
+  # reading configuration
+  # =====================
+  pdesc = mcf$pdesc
+  p     = mcf$initial_value
+
+  # storing the time
+  # =============================
+  last_time = as.numeric(proc.time()[3])
+
+  p2 = mcf$initial_value #predict(mcf,'p.all')
+
+  cat('evaluate objective function at starting point\n')
+  maxres =  MOPT_OBJ_FUNC(p2)
+  cat(sprintf('%d nodes, %d parameters, %d points per grid \n',mcf$N,length(mcf$params_to_sample),ns))
+
+  rr = data.frame() 
+  pp = mcf$params_to_sample[1]
+  nn=1
+
+  out <- vector("list",length(mcf$params_to_sample))
+  names(out) <- mcf$params_to_sample
+
+  for (pp in mcf$params_to_sample) {
+
+    # we create a range, let's span the entire domain
+    lb = mcf$pdesc[pp,'lb']
+    ub = mcf$pdesc[pp,'ub']
+    prange = seq( lb+(ub-lb)*pad/2,  lb+(ub-lb)*(1-pad/2) ,l=ns)
+
+    # we put the values in a list of parameters
+	# TODO watch out as some of the cluster functions take vectors
+	# while others take lists.
+    ptmp =p2
+    ps = list()
+    j=0
+    for (val in prange) {    
+      j=j+1
+      ptmp[[pp]] = val
+      ptmp$param_value = val
+      ptmp$chain=j
+      ps[[j]] = ptmp
+    }
+  
+    
+    cat('sending evaluations for ',pp,' in (', lb+(ub-lb)*pad/2,',',lb+(ub-lb)*(1-pad/2),')\n')
+    
+	# NOTE
+    #	watch out: had to remove the wrapper as non-standard form of obj fun output!
+	if (mcf$mode =='mpi'){
+		rs = clusterApplyLB(cl=mcf$cl,x=ps,fun=mcf$objfunc)
+	} else {
+		rs = mcf$mylbapply(ps,mcf$objfunc)
+	}
+
+	# get model output for each parameter value
+	out[[pp]] <- list()
+    for ( jj in 1:length(rs) ) {
+      if (is.null(rs[[jj]]))   next;
+      if (rs[[jj]]$status==-1) next;
+	  out[[pp]][[jj]] <- list()
+	  out[[pp]][[jj]]$pars <- ps[[jj]]
+	  out[[pp]][[jj]]$data <- rs[[jj]]$output
+    }
+
+    cat('got ', length(out[[pp]]), ' values\n')
+
+    cat('done with ',pp,'(',nn,'/',length(mcf$params_to_sample),')\n')
+    nn = nn+1
+
+  }
+
+  if (is.null(path)){
+	  save(out,mcf,file='est.slices.RData')
+  } else {
+	  save(out,mcf,file=file.path(mcf$wd,path,'est.slices.RData'))
+  }
+  return(out)
+}
