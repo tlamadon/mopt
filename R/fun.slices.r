@@ -9,12 +9,12 @@
 #' @param mcf object of class mopt
 #' @param ns number of points in each dimension to evaluate
 #' @param pad from bounds of parameter ranges. e.g. p in [0,1], avoid 0 and 1 with pad>0.
-#' @param path file path relative to \code{getwd()} where to save files
+#' @param file \code{/path/to/your/file}
 #' @return list with info and a data.frame \code{slices} summarizing all information of the exercise: parameter values, 
 #' simulated moments, data moments. Input to \code{\link{plot.slices(slices)}}.
 #' @export
 #' @example examples/example-slices.r
-compute.slices <- function(mcf,ns=30,pad=0.1,path=NULL) {
+compute.slices <- function(mcf,ns=30,pad=0.1,path="est.slices.RData") {
 
   # reading configuration
   # =====================
@@ -94,11 +94,7 @@ compute.slices <- function(mcf,ns=30,pad=0.1,path=NULL) {
 
   }
 
-  if (is.null(path)){
-	  save(rr,mcf,file='est.slices.RData')
-  } else {
-	  save(rr,mcf,file=file.path(mcf$wd,path,'est.slices.RData'))
-  }
+  save(rr,mcf,file=file)
   res = list()
   res$p.start = p2
   res$v.start = maxres
@@ -179,12 +175,12 @@ plot.slices <- function(file=NULL,outpath='',type="png") {
 #' @param mcf object of class mopt
 #' @param ns number of points in each dimension to evaluate
 #' @param pad from bounds of parameter ranges. e.g. p in [0,1], avoid 0 and 1 with pad>0.
-#' @param path file path relative to \code{getwd()} where to save files
+#' @param file \code{/path/to/your/file.RData}
 #' @return list by paramter name, parameter value index, containing the value of the parameter vector and a list \code{data} containing
 #' your custom model output.
 #' @export
 #' @example examples/example-slices2.r
-compute.slices2 <- function(mcf,ns=30,pad=0.1,path=NULL) {
+compute.slices2 <- function(mcf,ns=30,pad=0.1,file="est.slices.RData") {
 
   # reading configuration
   # =====================
@@ -255,10 +251,6 @@ compute.slices2 <- function(mcf,ns=30,pad=0.1,path=NULL) {
 
   }
 
-  if (is.null(path)){
-	  save(out,mcf,file='est.slices.RData')
-  } else {
-	  save(out,mcf,file=file.path(mcf$wd,path,'est.slices.RData'))
-  }
+  save(out,mcf,file=file)
   return(out)
 }
