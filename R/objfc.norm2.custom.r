@@ -1,5 +1,3 @@
-require(MASS)
-require(locfit)
 
 #' create an objective function which returns custom
 #' output from a bivariate normal density

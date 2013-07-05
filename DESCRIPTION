@@ -19,7 +19,8 @@ Depends:
     data.table,
     parallel,
     minqa,
-    MSBVAR
+    MSBVAR,
+    locfit
 LazyLoad: yes
 Collate:
     'mopt-package.r'
