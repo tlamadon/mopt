@@ -16,6 +16,7 @@ mcf$params_to_sample = c('x1','x2')
 mcf$moments_to_use   = c('m1','m2')
 mcf$mode             = 'mpi'
 mcf$source_on_nodes  = 'slaves.r'
+mcf$logdir           = 'workers'	# log directory relative to cf$wd
 mcf$iter             = 300
 mcf$algo             = algo.bgp
 mcf$objfunc          = MOPT_OBJ_FUNC
