@@ -1,7 +1,7 @@
 
 
 clean:
-	rm -rf *.out rollcall.txt *.dat ./workers; git pull; qstat -g c; qsub submit.sh;
+	rm -rf *.out rollcall.txt *.dat ./workers; echo; git pull; echo; qstat -g c; echo; qsub submit.sh;
 
 
 

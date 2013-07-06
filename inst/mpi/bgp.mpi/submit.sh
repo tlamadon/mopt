@@ -7,7 +7,7 @@ date
 # here's the SGE directives
 # ------------------------------------------
 #$ -q batch.q   # <- the name of the Q you want to submit to
-#$ -pe mpich 6  #  <- load the openmpi parallel env w/ 3 slots
+#$ -pe mpich 100 #  <- load the openmpi parallel env w/ 3 slots
 #$ -S /bin/bash   # <- run the job under bash
 #$ -N mopt-example # <- name of the job in the qstat output
 #$ -o std.out # <- name of the output file.
@@ -23,6 +23,6 @@ echo "loaded modules"
 module list
 
 echo "calling mpirun now"
-mpirun -np 6 /data/uctpfos/R/x86_64-unknown-linux-gnu-library/2.15/snow/RMPISNOW -q < example.bgp.mpi.r > example.Rout
+mpirun -np 100 /data/uctpfos/R/x86_64-unknown-linux-gnu-library/2.15/snow/RMPISNOW -q < example.bgp.mpi.r > example.Rout
 
 
