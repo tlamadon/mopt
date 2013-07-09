@@ -18,7 +18,7 @@ mcf$mode             = 'mpiLB'
 mcf$source_on_nodes  = 'slaves.r'
 mcf$logdir           = 'workers'	# log directory relative to cf$wd
 mcf$iter             = 300
-mcf$N                = 300
+mcf$N                = 100
 mcf$algo             = algo.bgp
 mcf$objfunc          = MOPT_OBJ_FUNC
 
