@@ -21,7 +21,7 @@ objfc.norm2.custom <- function(mu=c(0,0),sigma=diag(2),ns=50) {
 	  
 	  # say we want a bivariate kernel estimate of this data as an output
 	  out <- locfit(~ x+y, data=dat)
-
+	  
 	  res = list(
 	    p      = p,
 	    status = 1,

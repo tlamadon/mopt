@@ -88,11 +88,19 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
       rd$chain  = val$chain
 
       # collect the addititonal infos
+	  # add stuff that is not there as NA
       if (length(val$infos)>0) {
+		if (!("mem" %in% names(val$infos))) val$infos$mem <- NA
+		if (!("node" %in% names(val$infos))) val$infos$node <- NA
         rd.infos = data.frame(val$infos)
         colnames(rd.infos) <- paste('d',colnames(rd.infos),sep='.')	# what does the prefix '.d' mean?
         rd = cbind(rd,rd.infos)
-      }
+      } else {
+		val$infos <- list(node=NA,mem=NA)
+        rd.infos = data.frame(val$infos)
+        colnames(rd.infos) <- paste('d',colnames(rd.infos),sep='.')	# what does the prefix '.d' mean?
+        rd = cbind(rd,rd.infos)
+	  }
       
 	  # get the moments
       if (!is.null(val$sm) & nrow(val$sm)>0) {

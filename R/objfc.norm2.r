@@ -23,19 +23,23 @@ objfc.norm2 <- function(mu=c(0,0),sigma=diag(2),ns=50) {
 	  sm  =data.frame(names=c('m1','m2'),value=moments)
 	  sm$names = paste(sm$names)
 
-	  nname <- Sys.info()["nodename"]
+	  # get system info
+	  si <- Sys.info()
+	  nname <- si["nodename"]
 	  names(nname) <- NULL
 
-	  res = list(
-	    p      = p,
-	    chain  = p$chain,
-	    value  = value,
-	    status = 1,
-	    sm     = sm,
-	    infos  = list(node=nname),
-	    time   = as.numeric(proc.time()[3] - t1))
+	  # get memory usage
+	  mem <- paste(gc()[1,2],"MB used")
 
-	   return(res)
+	  res = list(
+				 p      = p,
+				 chain  = p$chain,
+				 value  = value,
+				 status = 1,
+				 sm     = sm,
+				 infos  = list(node=nname,mem=mem),
+				 time   = as.numeric(proc.time()[3] - t1))
+
    }
 
    return(obj)

@@ -17,7 +17,7 @@
 #' A very useful function is \code{\link{compute.slices}} and the associated \code{\link{plot.slices}} which will generate plots of how
 #' the different moments vary as you vary each parameters separately.
 #' 
-#' @import data.table MASS locfit digest
+#' @import data.table MASS locfit digest 
 #' @docType package
 #' @name mopt
 #' @author Ran Gu \email{lionup@@gmail.com}, Thibaut Lamadon \email{thibaut.lamadon@@gmail.com} , Florian Oswald \email{florian.oswald@@gmail.com}
