@@ -1,6 +1,9 @@
 require(plyr)
 require(MSBVAR)
 
+
+# TODO 
+# write documentation for this!
 # setting up the config
 # should be given 
 # list of model parameters including, 
@@ -29,6 +32,7 @@ mopt_config <- function(p) {
  cf$wd             = '~/git/bankruptcy/R'
  cf$source_on_nodes = 'example-bgp-mpi-slaves.r'
  cf$logdir         = 'sims/sim2/workers'	# log directory relative to cf$wd
+ cf$debug          = FALSE	# switch TRUE if want to save parameter to disk before each evaluation
  cf$params_to_sample = c()	#This is a vector of names: c('delta', 'b')
  cf$objfunc          = MOPT_OBJ_FUNC
  cf$modelinfo      = c()
@@ -43,10 +47,6 @@ mopt_config <- function(p) {
  cf$initial_value  = p
  cf$params_all     = names(p) #c('sep','c','b','s0','s1','firmMass','beta','delta','sigma','f_rho','f_mx','f_my','f_a')
  cf$N              = 3 # default in case of serial
- cf$mcfactor       = 1L # multicore factor on MPI cluster: if you have N chains which require (intermediate, private) multicore computation
-                        # you set this to the number of cores required by each chain.
-                        # for example, each chain requires 2 cores to compute the objective function: cf$mcfactor = 2
-                        # if you reserved N MPI cores, this will start off only N / cf$mcfactor
 
  param.descript = data.frame()
  for (n in names(p)) {
@@ -178,7 +178,9 @@ mopt_obj_wrapper_custom <- function(p,objfunc=NA) {
 #' prepares mopt to run with either MPI or openMP or just serial
 #' @export
 prepare.mopt_config <- function(cf) {
+
   if (cf$mode=='mpi') {
+
     cat('[mode=mpi] USING MPI !!!!! \n')
 
     # creating the cluster
@@ -187,8 +189,6 @@ prepare.mopt_config <- function(cf) {
     cl <- makeCluster(type='MPI')
 	cf$cl <- cl	# add cluster to the config as well
 
-	# we are hard coding the name of the cluster here
-	# as long as we always use the same name, that's fine.
 	  # worker roll call
 	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
       dir.create(file.path(cf$wd,cf$logdir),showWarnings=FALSE)
@@ -206,12 +206,39 @@ prepare.mopt_config <- function(cf) {
     # adding the load balanced lapply
     cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
 
-	stopifnot(is.integer(cf$mcfactor))
-	cf$N = floor(length(cl) / cf$mcfactor)
-	# TODO
-	# N is the number of chains. This need not be necessarily the number of cores/nodes available.
-	# for example suppose computation of the objective function requires
-	# 2 cores: so then we'll have N chains which requires a cluster with 2*N cores
+	cf$N = length(cl) 
+  
+  } else if (cf$mode=='mpiLB') {
+
+    cat('[mode=mpiLB] USING LOAD BALANCED MPI !!!!! \n')
+
+    # creating the cluster
+	# size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
+    require(snow)  
+    cl <- makeCluster(type='MPI')
+	cf$cl <- cl	# add cluster to the config as well
+
+	  # worker roll call
+	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
+      dir.create(file.path(cf$wd,cf$logdir),showWarnings=FALSE)
+	  cat("Master: I've got",num.worker,"workers\n")
+	  cat("Master: doing rollcall on cluster now\n")
+	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$wd,cf$logdir,"rollcall.txt"),append=FALSE)
+    # setting up the slaves
+    eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
+    eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
+    clusterCall(cl, rollcall, file.path(cf$wd,cf$logdir))
+
+    # adding the normal lapply
+    cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
+
+    # adding the load balanced lapply
+    cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
+
+	if (cf$N <= length(cl)){
+		warning('benefits of Load Balancing on cluster only materialize\nif you set number of chains N > number of nodes')
+	}
+
   } else if (cf$mode=='multicore') {
     cat('[mode=mulicore] YEAH !!!!! \n')    
     require(parallel)
@@ -237,7 +264,7 @@ prepare.mopt_config <- function(cf) {
       cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
       
       cf$N = length(cl)
-    } else{
+    } else {
       cf$mylapply  = mclapply;
       cf$mylbapply = mclapply;
       cf$N=detectCores()      
@@ -324,11 +351,14 @@ runMOpt <- function(cf,autoload=TRUE) {
   param_data = evaluateParameters(ps,cf)
 
   cat('Starting main MCMC loop\n')  
+    
+	 
   for (i in cf$i:cf$iter) {
 
     cf$i=i
     #                 step 1, evaluate candidates 
     # --------------------------------------------------------
+
     eval_start = as.numeric(proc.time()[3])
     rd = evaluateParameters(ps,cf)
     eval_time  = as.numeric(proc.time()[3]) - eval_start
