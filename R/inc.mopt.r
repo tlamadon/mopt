@@ -31,7 +31,7 @@ mopt_config <- function(p) {
  cf$file_errorparam= 'param_error.dat'
  cf$wd             = '~/git/bankruptcy/R'
  cf$source_on_nodes = 'example-bgp-mpi-slaves.r'
- cf$logdir         = 'sims/sim2/workers'	# log directory relative to cf$wd
+ cf$logdir         = file.path(cf$wd,'sims/sim2/workers')	# full path to log directory for workers
  cf$debug          = FALSE	# switch TRUE if want to save parameter to disk before each evaluation
  cf$params_to_sample = c()	#This is a vector of names: c('delta', 'b')
  cf$objfunc          = MOPT_OBJ_FUNC
@@ -191,14 +191,14 @@ prepare.mopt_config <- function(cf) {
 
 	  # worker roll call
 	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
-      dir.create(file.path(cf$wd,cf$logdir),showWarnings=FALSE)
+      dir.create(cf$logdir,showWarnings=FALSE)
 	  cat("Master: I've got",num.worker,"workers\n")
 	  cat("Master: doing rollcall on cluster now\n")
-	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$wd,cf$logdir,"rollcall.txt"),append=FALSE)
+	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
     # setting up the slaves
     eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
     eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
-    clusterCall(cl, rollcall, file.path(cf$wd,cf$logdir))
+    clusterCall(cl, rollcall, cf$logdir)
 
     # adding the normal lapply
     cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
@@ -220,14 +220,14 @@ prepare.mopt_config <- function(cf) {
 
 	  # worker roll call
 	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
-      dir.create(file.path(cf$wd,cf$logdir),showWarnings=FALSE)
+      dir.create(cf$logdir,showWarnings=FALSE)
 	  cat("Master: I've got",num.worker,"workers\n")
 	  cat("Master: doing rollcall on cluster now\n")
-	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$wd,cf$logdir,"rollcall.txt"),append=FALSE)
+	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
     # setting up the slaves
     eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
     eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
-    clusterCall(cl, rollcall, file.path(cf$wd,cf$logdir))
+    clusterCall(cl, rollcall, cf$logdir)
 
     # adding the normal lapply
     cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
