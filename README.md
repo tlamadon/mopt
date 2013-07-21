@@ -26,7 +26,7 @@ Wang, F. and Landau, D. Physical Review E  64  056101  (2001)
  
 ### Install
 
-    install.packages('devtools');require(devtools);install_github('mopt',user='tlamadon')
+    install.packages('devtools');require(devtools);install.packages('roxygen2');require(roxygen2);install_github('mopt',user='tlamadon')
 
 ### Contributors
 
