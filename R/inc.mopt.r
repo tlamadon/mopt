@@ -149,6 +149,12 @@ mopt_obj_wrapper <- function(p,objfunc=NA) {
 	},error = function(e) {
 		list(status=-1,error=e$message)
 	} ) 
+
+  # if status is <0 we store the parameters in a file
+  if (m$status<0) {
+    save(p,file=paste('per.',format(Sys.time(), "%m.%d.%y-%Hh%S"), '-',sample.int(1000,1) , '.dat',sep=''))
+  }
+
 	return(m) 
 	#     returns NA if there is any sort of crash
 	#     later it would be good to get the error message

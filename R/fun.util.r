@@ -55,7 +55,7 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
 	} else if (balance) {
 		vals = cf$mylbapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
 	} else {
-	    vals = cf$mylapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
+	  vals = cf$mylapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc)
 	}
     cat('done\n')
 
