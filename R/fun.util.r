@@ -67,7 +67,7 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
       rd = data.frame()
       if (!('status' %in% names(val))) next;
       if (val$status<0) {
-        print(paste('error: ',val$error,'\n'))
+        cat(paste('error: ',val$error,'\n'))
         next
       }
       checkEvalStructure(val,cf)
