@@ -326,6 +326,7 @@ runMOpt <- function(cf,autoload=TRUE) {
   # start from best last value
   if (file.exists(cf$file_chain) & autoload ) {
     load(cf$file_chain)
+    class(cf) <- 'mopt_config'
     cf$run = cf$run +1
 
   } else {
