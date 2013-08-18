@@ -153,14 +153,14 @@ mopt_obj_wrapper <- function(p,objfunc=NA) {
   # if status is <0 we store the parameters in a file
   if (m$status<0) {
     #save(p,file=paste('per.',format(Sys.time(), "%m.%d.%y-%Hh%S"), '-',sample.int(1000,1) , '.dat',sep=''))
-    if ( file.exists(cf$file_errorparam) ) {     
-      load(cf$file_errorparam)    
+    if ( file.exists('param_error.dat') ) {     
+      load('param_error.dat')    
     } else {
       per <- data.frame()
     }
     
     per <- rbind(per, data.frame(p))
-    save(per, file=cf$file_errorparam)
+    save(per, 'param_error.dat')
   
   }
 
