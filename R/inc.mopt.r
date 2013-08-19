@@ -160,7 +160,7 @@ mopt_obj_wrapper <- function(p,objfunc=NA) {
     }
     
     per <- rbind(per, data.frame(p))
-    save(per, 'param_error.dat')
+    save(per, file='param_error.dat')
   
   }
 
