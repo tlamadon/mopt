@@ -19,15 +19,13 @@ run.simplex <- function(mcf) {
     p[mcf$params_to_sample] = x
     rr = MOPT_OBJ_FUNC(p)
 
-    if (rr$value<infos$best) {
-      infos$best <<- rr$value
-    }
-    infos$count <<- infos$count+1
-
     if (!is.finite(rr$value)) {
       cat('objective function value is not finite')
       print(p)
-    }
+    }else{
+      if (rr$value<infos$best) infos$best <<- rr$value
+    }  
+    infos$count <<- infos$count+1
 
     cat(sprintf("[%i] value=%f best=%f \n",infos$count,rr$value,infos$best))
     return(rr$value)
@@ -42,11 +40,11 @@ run.simplex <- function(mcf) {
     lb[i] = mcf$pdesc$lb[mcf$pdesc$param==pp]
   }
 
-  print('using following bounds\n')
+  cat('using following bounds\n')
   print(data.frame(var=mcf$params_to_sample,lb=lb,ub=ub))
 
   par0 = as.numeric(p[mcf$params_to_sample])
-  control = list(maxfun = mcf$iter,iprint=4)
+  control = list(maxfun = mcf$iter,iprint=3)
   # start the simplex
   # res = hjkb(par0, objfunc, lower=lb,upper=ub)
   res = bobyqa(par0, objfunc,lower=lb,upper=ub,control=control)

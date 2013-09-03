@@ -149,6 +149,21 @@ mopt_obj_wrapper <- function(p,objfunc=NA) {
 	},error = function(e) {
 		list(status=-1,error=e$message)
 	} ) 
+
+  # if status is <0 we store the parameters in a file
+  if (m$status<0) {
+    #save(p,file=paste('per.',format(Sys.time(), "%m.%d.%y-%Hh%S"), '-',sample.int(1000,1) , '.dat',sep=''))
+    if ( file.exists('param_error.dat') ) {     
+      load('param_error.dat')    
+    } else {
+      per <- data.frame()
+    }
+    
+    per <- rbind(per, data.frame(p))
+    save(per, file='param_error.dat')
+  
+  }
+
 	return(m) 
 	#     returns NA if there is any sort of crash
 	#     later it would be good to get the error message
@@ -311,16 +326,11 @@ runMOpt <- function(cf,autoload=TRUE) {
   # start from best last value
   if (file.exists(cf$file_chain) & autoload ) {
     load(cf$file_chain)
-
-    #load saved mcf 
-    load('cf.dat')	  
-    cf <- c(cf,mmcf[setdiff(names(mmcf), names(cf))])
-    cf$shock_var = mmcf$shock_var
-    cf$run = max(param_data$run) +1
+    class(cf) <- 'mopt_config'
+    cf$run = cf$run +1
 
   } else {
     param_data = data.frame()
-    cf$run = 0
 
     # what is the meaning of these paramters?
     # I find theta, breaks, nu, and kk are used algo.wl.r, acc is used to update sample var.
@@ -364,9 +374,6 @@ runMOpt <- function(cf,autoload=TRUE) {
     eval_time  = as.numeric(proc.time()[3]) - eval_start
     if ( (i %% cf$save_freq)==1 & i>10 ) {
       save(cf,priv,param_data,file=cf$file_chain)      
-      #save mcf in case of restart
-      mmcf=cf
-      save(mmcf,file='cf.dat')
     }
 
     #            step 2, updating chain and computing guesses
