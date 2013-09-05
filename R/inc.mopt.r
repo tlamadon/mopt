@@ -208,9 +208,10 @@ prepare.mopt_config <- function(cf) {
 	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
     dir.create(cf$logdir,showWarnings=FALSE)
 	  cat("Master: I've got",num.worker,"workers\n")
-	  cat("Master: doing rollcall on cluster now (", file.path(cf$logdir,"rollcall.txt") ,"\n")
+	  cat("Master: doing rollcall on cluster now ( ", file.path(cf$logdir,"rollcall.txt") ," )\n")
 	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
     # setting up the slaves
+    cat("Master: setting directory and sourcing on slaves ( ",cf$wd,  cf$source_on_nodes ," )\n")
     eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
     eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
     clusterCall(cl, rollcall, cf$logdir)
