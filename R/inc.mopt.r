@@ -303,9 +303,8 @@ prepare.mopt_config <- function(cf) {
 #' @param dir path to the log directory
 rollcall <- function(dir){
   my.name <- Sys.info()["nodename"]
-  cat("I am",my.name,"and I'm ready to go.\n",file=file.path(dir,"rollcall.txt"),append=TRUE)
+  cat("I am a worker (pid=", Sys.getpid() ,"), my name is ",my.name,"and I'm ready to go.\n",file=file.path(dir,"rollcall.txt"),append=TRUE)
 }
-
 
 
 #' this is the main function, it will run the
