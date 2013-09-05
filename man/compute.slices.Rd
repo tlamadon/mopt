@@ -1,0 +1,72 @@
+\name{compute.slices}
+\alias{compute.slices}
+\title{Compute the objective function on a grid of params and show simulated moments}
+\usage{
+  compute.slices(mcf, ns = 30, pad = 0.1,
+    path = "est.slices.RData")
+}
+\arguments{
+  \item{mcf}{object of class mopt}
+
+  \item{ns}{number of points in each dimension to evaluate}
+
+  \item{pad}{from bounds of parameter ranges. e.g. p in
+  [0,1], avoid 0 and 1 with pad>0.}
+
+  \item{file}{\code{/path/to/your/file}}
+}
+\value{
+  list with info and a data.frame \code{slices} summarizing
+  all information of the exercise: parameter values,
+  simulated moments, data moments. Input to
+  \code{\link{plot.slices(slices)}}.
+}
+\description{
+  Will vary each parameter independently in a chosen range
+  and report the value of the resulting simulated moments
+  in relation to the moments in the data. Can be used to
+  construct a heuristic identification argument. Basically
+  it can be seen which parameter affects which dimension of
+  the model output, i.e. which simulated moment.
+}
+\examples{
+# generate slices for a model
+require(mopt)
+
+# let's take a dummy objective function
+MOPT_OBJ_FUNC <- objfc.norm2(c(0,0),ns=2000)
+
+# starting parameters
+p <- list(x1=0.5,x2=0.5)
+MOPT_OBJ_FUNC(p)
+
+# then we want to setup the mopt
+mcf                  = mopt_config(p)
+mcf$wd               = getwd()
+mcf$params_to_sample = c('x1','x2')
+mcf$moments_to_use   = c('m1','m2')
+mcf$mode             = 'multicore'
+mcf$algo             = algo.bgp
+
+
+# set the parameter bounds
+mcf <- mcf + 
+  samplep('x1',-1,1) +
+  samplep('x2',-1,1)
+
+# adding data moment values
+mcf <- mcf + datamoments(c('m1','m2'),
+                           c(0,0),
+                           c(0.1,0.1))
+
+# prepare to run with OpenMP
+require(parallel)
+options(mc.cores = detectCores())
+
+# finalize the preparation
+mcf <- prepare.mopt_config(mcf)
+
+# compute slices and generate plots
+res <- compute.slices(mcf,ns=30,pad=0.1)
+}
+

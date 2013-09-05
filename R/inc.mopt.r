@@ -199,18 +199,19 @@ prepare.mopt_config <- function(cf) {
     cat('[mode=mpi] USING MPI !!!!! \n')
 
     # creating the cluster
-	# size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
+	  # size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
     require(snow)  
     cl <- makeCluster(type='MPI')
-	cf$cl <- cl	# add cluster to the config as well
+	  cf$cl <- cl	# add cluster to the config as well
 
 	  # worker roll call
 	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
-      dir.create(cf$logdir,showWarnings=FALSE)
+    dir.create(cf$logdir,showWarnings=FALSE)
 	  cat("Master: I've got",num.worker,"workers\n")
-	  cat("Master: doing rollcall on cluster now\n")
+	  cat("Master: doing rollcall on cluster now ( ", file.path(cf$logdir,"rollcall.txt") ," )\n")
 	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
     # setting up the slaves
+    cat("Master: setting directory and sourcing on slaves ( ",cf$wd,  cf$source_on_nodes ," )\n")
     eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
     eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
     clusterCall(cl, rollcall, cf$logdir)
@@ -228,17 +229,18 @@ prepare.mopt_config <- function(cf) {
     cat('[mode=mpiLB] USING LOAD BALANCED MPI !!!!! \n')
 
     # creating the cluster
-	# size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
+	  # size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
     require(snow)  
     cl <- makeCluster(type='MPI')
-	cf$cl <- cl	# add cluster to the config as well
+	  cf$cl <- cl	# add cluster to the config as well
 
 	  # worker roll call
 	  num.worker <- length(clusterEvalQ(cl,Sys.info()))
-      dir.create(cf$logdir,showWarnings=FALSE)
+    dir.create(cf$logdir,showWarnings=FALSE)
 	  cat("Master: I've got",num.worker,"workers\n")
 	  cat("Master: doing rollcall on cluster now\n")
 	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
+    
     # setting up the slaves
     eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
     eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
