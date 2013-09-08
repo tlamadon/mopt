@@ -380,7 +380,7 @@ runMOpt <- function(cf,autoload=TRUE) {
     #            step 2, updating chain and computing guesses
     # ----------------------------------------------------------------
     algo_start = as.numeric(proc.time()[3])
-    rr   = mcf$algo(rd,param_data, 0, mcf, mcf$pdesc, priv)
+    rr   = cf$algo(rd,param_data, 0, cf, cf$pdesc, priv)
     algo_time  = as.numeric(proc.time()[3]) - algo_start
     priv = rr$priv
     ps   = rr$ps
