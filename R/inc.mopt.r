@@ -359,7 +359,7 @@ runMOpt <- function(cf,autoload=TRUE) {
   # get initial candidates
   cat('Computing intial candidates\n')
   ps = computeInitialCandidates(cf$N,cf)
-  param_data = evaluateParameters(ps,cf)
+  param_data = rbind(param_data, evaluateParameters(ps,cf))
 
   cat('Starting main MCMC loop\n')  
     
