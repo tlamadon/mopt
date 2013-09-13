@@ -7,7 +7,6 @@ algo.bgp <- function(evals, chains, last, cfg, pdesc, priv) {
   # we are going to use N chains with each a different temperiing
   # and we are also going to use energy rings for cross chain jumps
 
-  rr = data.frame()
   ps=list()
 
   params_to_sample  = cfg$params_to_sample
