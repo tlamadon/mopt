@@ -261,7 +261,7 @@ prepare.mopt_config <- function(cf) {
     require(parallel)
     
     if(Sys.info()[['sysname']]=='Windows') {
-      cl <- makeCluster(spec=detectCores(),type='MPI')
+      cl <- makeCluster(spec=pmin(detectCores(),cf$N),type='MPI')
       
       # worker roll call
       dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
@@ -284,7 +284,7 @@ prepare.mopt_config <- function(cf) {
     } else {
       cf$mylapply  = mclapply;
       cf$mylbapply = mclapply;
-      cf$N=detectCores()      
+      cf$N= pmin(detectCores(),cf$N)
     }
   } else {
     cf$mode = 'serial'
