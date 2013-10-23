@@ -14,7 +14,7 @@
 #' simulated moments, data moments. Input to \code{\link{plot.slices(slices)}}.
 #' @export
 #' @example examples/example-slices.r
-compute.slices <- function(mcf,ns=30,pad=0.1,path="est.slices.RData") {
+compute.slices <- function(mcf,ns=30,pad=0.1,file="est.slices.RData") {
 
   # reading configuration
   # =====================
