@@ -115,14 +115,14 @@ compute.slices <- function(mcf,ns=30,pad=0.1,file="est.slices.RData") {
 plot.slices <- function(file=NULL,outpath='',type="png") {
   # we want to keep all submoments, value, param and param_value
 
-	if (is.null(inpath)) {
+	if (is.null(file)) {
 		load('est.slices.RData')
 	} else {
 		load(file)
 	}
   
 	nn = names(rr)
-  rr$conv=rr$status>0
+  rr$conv=as.numeric(rr$status)>0
   
   rr.m = melt(rr,id=c('param','param_value','conv'))
   rr.m = subset(rr.m,rr.m$variable=='value' | str_detect(rr.m$variable,'sm'))
