@@ -125,7 +125,7 @@ datamoments <- function(names,values,sds) {
 # later it would be good to get the error message
 #  }
 
-mopt_obj_wrapper <- function(p,objfunc=NA) {
+mopt_obj_wrapper <- function(p,objfunc=NA,errfile='param_error.dat') {
 	m = tryCatch( {
 
 		#         get result
@@ -153,14 +153,14 @@ mopt_obj_wrapper <- function(p,objfunc=NA) {
   # if status is <0 we store the parameters in a file
   if (m$status<0) {
     #save(p,file=paste('per.',format(Sys.time(), "%m.%d.%y-%Hh%S"), '-',sample.int(1000,1) , '.dat',sep=''))
-    if ( file.exists('param_error.dat') ) {     
-      load('param_error.dat')    
+    if ( file.exists(errfile) ) {     
+      load(errfile)    
     } else {
       per <- data.frame()
     }
     
     per <- rbind(per, data.frame(p))
-    save(per, file='param_error.dat')
+    save(per, file=errfile)
   
   }
 
