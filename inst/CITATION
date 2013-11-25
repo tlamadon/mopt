@@ -3,8 +3,8 @@ citHeader("To cite the mopt package in publications please use:")
 
 
 citEntry(
-  entry = 'manual',
-  title = "mopt: MCMC moment optimzation,
+  entry = "manual",
+  title = "mopt: MCMC moment optimzation",
   author = personList(as.person("Thibaut Lamadon"), 
 					  as.person("Florian Oswald"),
 					  as.person("Ran Gu")),
