@@ -4,6 +4,9 @@ echo "starting qsub script file"
 source ~/.bash_profile
 date 
 
+RSNOW=`Rscript -e "cat(.libPaths()[[1]])"`
+
+echo $RSNOW
 # here's the SGE directives
 # ------------------------------------------
 #$ -q batch.q   # <- the name of the Q you want to submit to
@@ -23,6 +26,6 @@ echo "loaded modules"
 module list
 
 echo "calling mpirun now"
-mpirun -np 100 /data/uctpfos/R/x86_64-unknown-linux-gnu-library/2.15/snow/RMPISNOW -q < example.bgp.mpi.r > example.Rout
+mpirun -np 3 $RSNOW/snow/RMPISNOW -q < example.bgp.mpi.r > example.Rout
 
 
