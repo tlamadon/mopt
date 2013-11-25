@@ -1,12 +1,19 @@
 Package: mopt
 Type: Package
-Title: A package to run parallel estimation without derivative information
-Version: 0.1
+Title: Parallel Derivative-free Moment Estimation 
+Version: 1.0
 Date: 2013-02-14
-Author: Ran Gu, Thibaut Lamadon, FLorian Oswald
-Maintainer: Ran Gu <loinup@gmail.com>, Thibaut Lamadon
-    <thibaut.lamadon@gmail.com>, Florian Oswald <florian.oswald@gmail.com>
-Description: More about what it does (maybe more than one line)
+Author: Ran Gu [ctb], 
+        Thibaut Lamadon [ctb,cre], 
+        Florian Oswald [ctb]
+Maintainer: Thibaut Lamadon <thibaut.lamadon@gmail.com>, 
+            Florian Oswald <florian.oswald@gmail.com>
+Description: mopt is a suite of derivative-free MCMC optimization algorithms that 
+             can be used to find the maximum of an objective function. The 
+             package is designed with a particular focus on cases where this
+             objective function is composed of moment conditions. This includes
+             standard GMM as well as simulated method of moments or indeed any
+             other moment-like estimation. 
 License: MIT
 Depends:
     R (>= 2.12.1),
