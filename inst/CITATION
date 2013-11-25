@@ -1,0 +1,17 @@
+
+citHeader("To cite the mopt package in publications please use:")
+
+
+citEntry(
+  entry = "manual",
+  title = "mopt: MCMC moment optimzation",
+  author = personList(as.person("Thibaut Lamadon"), 
+					  as.person("Florian Oswald"),
+					  as.person("Ran Gu")),
+  year = "2013",
+  url = "https://github.com/tlamadon/mopt",
+  textVersion = "T. Lamadon, F. Oswald and R. Gu. mopt: MCMC moment optimization. 2013"
+)
+
+
+
