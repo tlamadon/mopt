@@ -3,7 +3,7 @@
 \title{Compute the objective function on a grid of params and show simulated moments}
 \usage{
   compute.slices(mcf, ns = 30, pad = 0.1,
-    path = "est.slices.RData")
+    file = "est.slices.RData")
 }
 \arguments{
   \item{mcf}{object of class mopt}

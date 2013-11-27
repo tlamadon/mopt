@@ -1,6 +1,8 @@
 #' generates different plots from a chain
 #' @export
-plot.mopt_config <- function(mopt,what='all',pd=NA,taildata=0,filename=mopt$file_chain) {
+plot.mopt_env <- function(me,what='all',pd=NA,taildata=0) {
+
+  mopt = me$cf
 
   graphs = c('pdistr','ptime','mdistr','pmpoints','pmreg','vtime','mtime','all','mtable')
 
@@ -11,9 +13,8 @@ plot.mopt_config <- function(mopt,what='all',pd=NA,taildata=0,filename=mopt$file
 
   if ('all' %in% what) what = graphs;
 
-  source('~/git/Utils/R/ggtable2.r')
+  param_data = data.table(me$param_data)
 
-  load(filename)
 
   mnames = grep('submoments.',names(param_data),value=TRUE)
   datamnames = grep('submoments.data',names(param_data),value=TRUE)
@@ -158,8 +159,9 @@ plot.mopt_config <- function(mopt,what='all',pd=NA,taildata=0,filename=mopt$file
 
 }
 
-print.mopt_config <- function(mopt) {
-
+print.mopt_env <- function(me) {
+  cat(sprintf(" %3.d chains / %5.d evaluations / %3.d parameters estimated" , 
+          me$param_data[,length(unique(chain))], me$param_data[,max(i)] , length(me$cf$params_to_sample))) 
 }
 
 
@@ -192,7 +194,7 @@ cat(STR,file=filename_make)
 #' @param what can be 'p.all' the best parameter set as a list, 'p.sd' for 
 #' sampled parameters with standard deviations based on coldest chain, 'm' for list of 
 #' simulated and data moments next to each other
-predict.mopt_config <- function(cf,what='p.all',base='') {
+predict.mopt_env <- function(cf,what='p.all',base='') {
 
   # first type, is to return the parameters with the highest value
   load(paste(base,cf$file_chain,sep=''))
@@ -224,4 +226,21 @@ predict.mopt_config <- function(cf,what='p.all',base='') {
 
   return(p)
 }
+
+#' loads a mopt config from file
+#' for now the file has to be local
+mopt.load <- function(filename) {
+
+  # generate a local tmp file
+  # filename = tempfile()
+  # get the file using scp
+  # system(paste('scp hpc:test.txt',filename))
+
+  env = new.env()
+  load(filename,envir=env)
+  class(env) <- 'mopt_env'
+  env$param_data = data.table(env$param_data)
+  return(env)
+}
+
 
