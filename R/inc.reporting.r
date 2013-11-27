@@ -194,10 +194,12 @@ cat(STR,file=filename_make)
 #' @param what can be 'p.all' the best parameter set as a list, 'p.sd' for 
 #' sampled parameters with standard deviations based on coldest chain, 'm' for list of 
 #' simulated and data moments next to each other
-predict.mopt_env <- function(cf,what='p.all',base='') {
+predict.mopt_env <- function(me,what='p.all',base='') {
+
 
   # first type, is to return the parameters with the highest value
-  load(paste(base,cf$file_chain,sep=''))
+  cf = me$cf
+  param_data = data.frame(me$param_data)
   I = which(param_data$value == min(param_data$value,na.rm=TRUE))[[1]]
 
   params_to_sample  = cf$params_to_sample
@@ -228,13 +230,15 @@ predict.mopt_env <- function(cf,what='p.all',base='') {
 }
 
 #' loads a mopt config from file
-#' for now the file has to be local
-mopt.load <- function(filename) {
+#' you can even refer to a remote file over ssh
+mopt.load <- function(filename='',remote='') {
 
+  if (str_length(remote)>0) {
   # generate a local tmp file
-  # filename = tempfile()
-  # get the file using scp
-  # system(paste('scp hpc:test.txt',filename))
+    filename = tempfile()
+    # get the file using scp
+    system(paste('scp',remote,filename))
+  } 
 
   env = new.env()
   load(filename,envir=env)
