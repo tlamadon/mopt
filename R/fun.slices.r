@@ -116,30 +116,40 @@ plot.slices <- function(file=NULL,outpath='',type="png") {
   # we want to keep all submoments, value, param and param_value
 
 	if (is.null(file)) {
-		load('est.slices.RData')
+		load('slices.RData')
 	} else {
 		load(file)
 	}
   
-	nn = names(rr)
   rr$conv=as.numeric(rr$status)>0
   
-  rr.m = melt(rr,id=c('param','param_value','conv'))
-  rr.m = subset(rr.m,rr.m$variable=='value' | str_detect(rr.m$variable,'sm'))
+  rr.m          = melt(rr,id=c('param','param_value','conv'))
+  rr.m          = subset(rr.m,rr.m$variable=='value' | str_detect(rr.m$variable,'sm'))
   rr.m$variable = gsub('sm.','',rr.m$variable)
-  rr.m$from = 'model'
+  rr.m$from     = 'model'
+  rr.m$value    = as.numeric(rr.m$value)
 
   rr.m=data.table(rr.m)
-  params.data = subset(data.frame(value = unlist(p) , param=names(p)),param %in% unique(rr.m$param))
+
+  # check if we have got the right number of moments in mcf as
+  # in rr.m
+  
+  # this data.frame holds the initial values
+  # of the parameters
+  init.param.data = data.frame(value = unlist(mcf$initial_value) , param=names(mcf$initial_value))
+
+  # we subset it to the ones we sampled over
+  init.param.data = subset(init.param.data,param %in% unique(rr.m$param))
+
   for (pp in unique(rr.m$variable)) {
     if (pp == 'value') next;
 
     gp <- ggplot(subset(rr.m,variable==pp & from=='model')) + geom_point(aes(x=param_value,y=value,color=conv),size=1) + 
       geom_line(aes(x=param_value,y=value,group='param'),size=0.3) + 
       geom_hline(aes(yintercept=value),data=subset(mcf$data.moments,moment==pp),linetype=2) +
-      geom_vline(aes(xintercept=value),data=params.data,linetype=2,color='red') +
+      geom_vline(aes(xintercept=value),data=init.param.data,linetype=2,color='red') +
       facet_wrap(~param,scales='free_x',ncol=3) +
-      scale_y_discrete(paste('value of',pp))+ scale_x_continuous('varying parameter') + theme_bw()
+      scale_y_continuous(paste('value of',pp))+ scale_x_continuous('varying parameter') + theme_bw()
     #print(gp)
     if (type=="png") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
     if (type=="pdf") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.pdf',sep=''),width=10.6, height=5.93)
@@ -150,7 +160,7 @@ plot.slices <- function(file=NULL,outpath='',type="png") {
       geom_line(aes(x=param_value,y=value,group='param'),size=0.3) + 
       geom_vline(aes(xintercept=value),data=params.data,linetype=2,color='red') +
       facet_wrap(~param,scales='free_x',ncol=3) +
-      scale_y_discrete('objective function')+ scale_x_continuous('varying parameter') + theme_bw()
+      scale_y_continuous('objective function')+ scale_x_continuous('varying parameter') + theme_bw()
     #print(gp)
     if (type=="png") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
     if (type=="pdf") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.pdf',sep=''),width=10.6, height=5.93)
