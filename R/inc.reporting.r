@@ -113,17 +113,20 @@ plot.mopt_env <- function(me,what='all',pd=NA,taildata=0) {
   }
 
   if ('ptime' %in% what) {
-    quartz()
-    param_data$t = c(1:nrow(param_data))
-    gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=mopt$params_to_sample,id=c('t'))
-    gp <- ggplot(gdata,aes(x=t,y=value)) + geom_point(size=0.5,color='red') + facet_wrap(~variable,scales='free')
+    param_data = data.frame(me$param_data)
+    gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=paste('p',me$cf$params_to_sample,sep='.'),id=c('i','chain'))
+    gp <- ggplot(gdata,aes(x=i,color=chain,group=chain,y=value)) + 
+      geom_point(size=0.5) + 
+      geom_line(size=0.5) + 
+      facet_wrap(~variable,scales='free') +
+      theme_bw()
     print(gp)
   }
 
   if ('mtime' %in% what) {
     quartz()
     param_data$t = c(1:nrow(param_data))
-    gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=mnames,id=c('t'))
+    gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=mnames,id=c('t','chain'))
     gdata$variable = gsub('submoments.','',gdata$variable)
     gp <- ggplot(gdata,aes(x=t,y=value)) + 
           geom_point(size=0.5) + 
@@ -159,6 +162,8 @@ plot.mopt_env <- function(me,what='all',pd=NA,taildata=0) {
 
 }
 
+#' print method for mopt_env
+#' @export
 print.mopt_env <- function(me) {
   cat(sprintf(" %3.d chains / %5.d evaluations / %3.d parameters estimated" , 
           me$param_data[,length(unique(chain))], me$param_data[,max(i)] , length(me$cf$params_to_sample))) 
@@ -231,6 +236,7 @@ predict.mopt_env <- function(me,what='p.all',base='') {
 
 #' loads a mopt config from file
 #' you can even refer to a remote file over ssh
+#' @export
 mopt.load <- function(filename='',remote='') {
 
   if (str_length(remote)>0) {
