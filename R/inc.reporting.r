@@ -1,17 +1,26 @@
 #' generates different plots from a chain
 #' @export
-plot.mopt_env <- function(me,what='all',pd=NA,taildata=0) {
+plot.mopt_env <- function(me,what='na',pd=NA,taildata=0) {
 
   mopt = me$cf
 
-  graphs = c('pdistr','ptime','mdistr','pmpoints','pmreg','vtime','mtime','all','mtable')
+  desc = list(
+    'pdistr'='parameter posterior distribution',
+    'ptime' ='parameters over time',
+    'mdistr'='moment disitribution',
+    'vtime' ='objective value over time',
+    'mtime' ='moment over time',
+    'mtable' = 'moment table',
+    'pmv'   = 'parameter mean/variance per chain')
+  graphs = names(desc)
 
   if (length(setdiff(what,graphs))>0) {
-    cat("what should be 'all' or a subset of ", paste(graphs,collapse=','), '\n')
-    return(NULL)
+    cat("outputs available : \n")
+    for (g in graphs) {
+      cat(sprintf("%6.6s: %s \n",g,desc[[g]]))
+    }
+    return()
   }
-
-  if ('all' %in% what) what = graphs;
 
   param_data = data.table(me$param_data)
 
@@ -160,6 +169,13 @@ plot.mopt_env <- function(me,what='all',pd=NA,taildata=0) {
     print(ggt)
   }
 
+  if ('pmv' %in% what) {
+    mm = melt(me)
+    gg <- ggplot(mm[,list(mean(value),sd(value)),list(chain,variable)],aes(x=chain,y=V1,ymin=V1-V2,ymax=V1+V2)) + 
+            geom_pointrange() + facet_wrap(~variable,scales='free') + theme_bw()
+    print(gg)
+  }
+
 }
 
 #' print method for mopt_env
@@ -253,4 +269,12 @@ mopt.load <- function(filename='',remote='') {
   return(env)
 }
 
+#' melts data with only sampled parameters
+#' @export
+melt.mopt_env <- function(me) {
+  param_data = data.frame(me$param_data)
+  gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=paste('p',me$cf$params_to_sample,sep='.'),id=c('i','chain'))
+  gdata$variable = str_replace(gdata$variable,'p.','')
+  return(data.table(gdata))
+}
 

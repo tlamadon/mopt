@@ -2,7 +2,7 @@
 \alias{plot.mopt_env}
 \title{generates different plots from a chain}
 \usage{
-  plot.mopt_env(me, what = "all", pd = NA, taildata = 0)
+  plot.mopt_env(me, what = "na", pd = NA, taildata = 0)
 }
 \description{
   generates different plots from a chain
