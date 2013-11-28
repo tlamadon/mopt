@@ -247,6 +247,16 @@ predict.mopt_env <- function(me,what='p.all',base='') {
     return(sim.moments)
   }
 
+  if (what=='coda') {
+    mm = melt(me)
+    mcs = list()
+    for (i in 1:5) {
+      mmm = cast(mm[chain==i],t~variable)
+      mcs[[i]] = as.mcmc(mmm)
+    }
+    return(mcmc.list(mcs))
+  }
+
   return(p)
 }
 
@@ -265,6 +275,8 @@ mopt.load <- function(filename='',remote='') {
   env = new.env()
   load(filename,envir=env)
   class(env) <- 'mopt_env'
+  # add time and append accept rejects
+  env$param_data = ddply(env$param_data,.(chain),function(d) {d$t = 1:nrow(d);d})
   env$param_data = data.table(env$param_data)
   return(env)
 }
@@ -273,8 +285,11 @@ mopt.load <- function(filename='',remote='') {
 #' @export
 melt.mopt_env <- function(me) {
   param_data = data.frame(me$param_data)
-  gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=paste('p',me$cf$params_to_sample,sep='.'),id=c('i','chain'))
+  gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=paste('p',me$cf$params_to_sample,sep='.'),id=c('t','chain'))
   gdata$variable = str_replace(gdata$variable,'p.','')
   return(data.table(gdata))
 }
+
+
+
 
