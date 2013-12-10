@@ -88,7 +88,7 @@ algo.bgp <- function(evals, chains, last, cfg, pdesc, priv) {
       status = 1
     }
 
-	cat(sprintf('[%d] value and ratio: %f/%f A=%d prob=%f rate=%f var=%f status=%d secs=%1.0f node=%s mem=%s\n', c.current, val_old$value, val_new$value,  ACC, prob, chain.states$acc[c.current] ,chain.states$shock_var[c.current],status,val_new$time,as.character(val_new$d.node),as.character(val_new$d.mem)))
+	cat(sprintf('[%d] value and ratio: %8.4f/%8.4f A=%d prob=%8.4f rate=%8.4f var=%8.4f status=%d secs=%8.4f node=%s mem=%s\n', c.current, val_old$value, val_new$value,  ACC, prob, chain.states$acc[c.current] ,chain.states$shock_var[c.current],status,val_new$time,as.character(val_new$d.node),as.character(val_new$d.mem)))
 	#     cat(sprintf('[%d] value and ratio: %f/%f A=%d prob=%f rate=%f var=%f status=%d node=%s\n', c.current, val_old$value, val_new$value,  ACC, prob, chain.states$acc[c.current] ,chain.states$shock_var[c.current],status,as.character(val_new$infos$d.node)))
     
     # updating sampling variance

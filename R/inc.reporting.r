@@ -182,7 +182,7 @@ plot.mopt_env <- function(me,what='na',pd=NA,taildata=0) {
 #' @export
 print.mopt_env <- function(me) {
   cat(sprintf(" %3.d chains / %5.d evaluations / %3.d parameters estimated" , 
-          me$param_data[,length(unique(chain))], me$param_data[,max(i)] , length(me$cf$params_to_sample))) 
+          me$param_data[,length(unique(chain))], me$param_data[,max(t)] , length(me$cf$params_to_sample))) 
 }
 
 
