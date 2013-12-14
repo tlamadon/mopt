@@ -1,8 +1,7 @@
 all: doc install
 
 install:
-	cd ..
-	R CMD INSTALL  ./ --clean
+	Rscript -e "require(devtools);require(digest); install('.');"	
 
 doc:
 	Rscript -e "require(devtools);require(digest); document('./');"	
