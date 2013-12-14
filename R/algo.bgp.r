@@ -20,7 +20,7 @@ algo.bgp <- function(evals, chains, last, cfg, pdesc, priv) {
   if (is.null(priv$chain.states)) {
     chain.states = list()
     nzerotemp = pmin(N,cfg$n_untempered)
-    chain.states$tempering = c(seq(100,1,l=N-nzerotemp,rep(1,nzerotemp))
+    chain.states$tempering = c(seq(100,1,l=N-nzerotemp),rep(1,nzerotemp))
     chain.states$acc       = seq(0.5,0.5,l=N)
     chain.states$shock_var = seq(cfg$shock_var,cfg$shock_var,l=N)
     priv = list(chain.states = chain.states)
