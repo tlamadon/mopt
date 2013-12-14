@@ -43,6 +43,7 @@ mopt_config <- function(p) {
  cf$moments.data   = c()
  cf$moments.sd     = c()
  cf$np_shock       = 1
+ cf$n_untempered   = 5
  cf$save_freq      = 25
  cf$initial_value  = p
  cf$params_all     = names(p) #c('sep','c','b','s0','s1','firmMass','beta','delta','sigma','f_rho','f_mx','f_my','f_a')
