@@ -29,6 +29,7 @@ mopt_config <- function(p) {
  cf$file_chain     = 'evaluations.dat'
  cf$file_lastparam = 'param_submit.dat'
  cf$file_errorparam= 'param_error.dat'
+ cf$save_error     = FALSE
  cf$wd             = '~/git/bankruptcy/R'
  cf$source_on_nodes = 'example-bgp-mpi-slaves.r'
  cf$logdir         = file.path(cf$wd,'sims/sim2/workers')	# full path to log directory for workers
@@ -153,16 +154,14 @@ mopt_obj_wrapper <- function(p,objfunc=NA,errfile='param_error.dat') {
 
   # if status is <0 we store the parameters in a file
   if (m$status<0) {
-    #save(p,file=paste('per.',format(Sys.time(), "%m.%d.%y-%Hh%S"), '-',sample.int(1000,1) , '.dat',sep=''))
-    if ( file.exists(errfile) ) {     
-      load(errfile)    
-    } else {
-      per <- data.frame()
-    }
-    
-    per <- rbind(per, data.frame(p))
-    save(per, file=errfile)
-  
+    try({
+      #save(p,file=paste('per.',format(Sys.time(), "%m.%d.%y-%Hh%S"), '-',sample.int(1000,1) , '.dat',sep=''))
+      per <- NULL
+      if ( file.exists(errfile)) try(load(errfile));
+      if (is.null(per)) per <- data.frame();
+      per <- rbind(per, data.frame(p))
+      save(per, file=errfile)
+    })
   }
 
 	return(m) 
