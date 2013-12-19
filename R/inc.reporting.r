@@ -313,20 +313,26 @@ melt.mopt_env <- function(me,cols=NULL) {
   if (!is.null(cols)) {
 
     if (cols=='p') {
-      gdata = param_data[,c('temp','chain','acc','t',paste('p',me$cf$params_to_sample,sep='.'))]
-      colnames(gdata)  =  str_replace( colnames(gdata) ,'p.','')
+      gdata = param_data[,c('objvalue','temp','chain','acc','t',paste('p',me$cf$params_to_sample,sep='.'))]
+      colnames(gdata)  =  str_replace( colnames(gdata) ,'p\\.','')
       return(data.table(gdata))
     } 
 
     if (cols=='m') {
-      gdata = param_data[,c('temp','chain','t','acc',paste('m',me$cf$moments_to_use,sep='.'))]
-      colnames(gdata)  =  str_replace( colnames(gdata) ,'m.','')
+      gdata = param_data[,c('objvalue','temp','chain','t','acc',paste('m',me$cf$moments_to_use,sep='.'))]
+      colnames(gdata)  =  str_replace( colnames(gdata) ,'m\\.','')
       return(data.table(gdata))
     }
 
+    if (cols=='mp') {
+      gdata = param_data[,c('objvalue','temp','chain','t','acc',paste('m',me$cf$moments_to_use,sep='.'),paste('p',me$cf$params_to_sample,sep='.'))]
+      colnames(gdata)  =  str_replace( colnames(gdata) ,'p\\.','')
+      colnames(gdata)  =  str_replace( colnames(gdata) ,'m\\.','')
+      return(data.table(gdata))
+    }
   }
 
-  gdata = melt(param_data,measure.vars=paste('p',me$cf$params_to_sample,sep='.'),id=c('t','chain','temp','acc'))
+  gdata = melt(param_data,measure.vars=paste('p',me$cf$params_to_sample,sep='.'),id=c('objvalue','t','chain','temp','acc'))
   gdata$variable = str_replace(gdata$variable,'p.','')
   return(data.table(gdata))
 }
