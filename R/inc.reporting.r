@@ -1,6 +1,6 @@
 #' generates different plots from a chain
 #' @export
-plot.mopt_env <- function(me,what='na',pd=NA,taildata=0) {
+plot.mopt_env <- function(me,what='na',select='untempered',taildata=0) {
 
   mopt = me$cf
 
@@ -24,6 +24,9 @@ plot.mopt_env <- function(me,what='na',pd=NA,taildata=0) {
 
   param_data = data.table(me$param_data)
 
+  if (select=='untempered') {
+    param_data = subset(param_data,chain %in% which(me$priv$chain.states$tempering==1))
+  }
 
   mnames = grep('submoments.',names(param_data),value=TRUE)
   datamnames = grep('submoments.data',names(param_data),value=TRUE)
@@ -33,12 +36,12 @@ plot.mopt_env <- function(me,what='na',pd=NA,taildata=0) {
 
   # reporting the distributions of the parameters
   if ('pdistr' %in% what) {
-    quartz()
+    
     # we also want to append the best param value
     I = which(param_data$value == min(param_data$value,na.rm=TRUE))
     best_data = param_data[I,]
 
-    gp <- ggplot(melt(subset(param_data,chain==min(param_data$chain)),measure.vars=mopt$params_to_sample,id=c()),aes(x=value)) +
+    gp <- ggplot(melt(param_data,measure.vars=paste('p',mopt$params_to_sample,sep='.'),id=c()),aes(x=value)) +
         geom_vline(aes(xintercept=value),data = melt(best_data,measure.vars=mopt$params_to_sample,id=c()),color='blue',linetype=2,size=0.3) +
         stat_density(fill='blue',alpha=0.5) + facet_wrap(~variable,scales='free')
     print(gp)
@@ -122,7 +125,7 @@ plot.mopt_env <- function(me,what='na',pd=NA,taildata=0) {
   }
 
   if ('ptime' %in% what) {
-    param_data = data.frame(me$param_data)
+    #param_data = data.frame(me$param_data)
     gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=paste('p',me$cf$params_to_sample,sep='.'),id=c('i','chain'))
     gp <- ggplot(gdata,aes(x=i,color=chain,group=chain,y=value)) + 
       geom_point(size=0.5) + 
@@ -263,7 +266,7 @@ predict.mopt_env <- function(me,what='p.all',base='') {
 #' loads a mopt config from file
 #' you can even refer to a remote file over ssh
 #' @export
-mopt.load <- function(filename='',remote='') {
+mopt.load <- function(filename='',remote='',reload=NULL) {
 
   if (str_length(remote)>0) {
   # generate a local tmp file
@@ -272,20 +275,58 @@ mopt.load <- function(filename='',remote='') {
     system(paste('scp',remote,filename))
   } 
 
+  if (!is.null(reload)) {
+    filename = tempfile()
+    # get the file using scp
+    system(paste('scp',reload$remote,filename))
+  } 
+
   env = new.env()
   load(filename,envir=env)
   class(env) <- 'mopt_env'
   # add time and append accept rejects
   env$param_data = ddply(env$param_data,.(chain),function(d) {d$t = 1:nrow(d);d})
   env$param_data = data.table(env$param_data)
+  env$remote = remote
   return(env)
 }
 
 #' melts data with only sampled parameters
+#' if set cols='m' or cols='p' extract the wide format with 
+#' only parameters or only moments
 #' @export
-melt.mopt_env <- function(me) {
+melt.mopt_env <- function(me,cols=NULL) {
   param_data = data.frame(me$param_data)
-  gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=paste('p',me$cf$params_to_sample,sep='.'),id=c('t','chain'))
+  param_data = data.table(rename(param_data,c(value='objvalue')))
+
+  # compute accept recject
+  setkey(param_data,chain,t)
+  param_data[,i.l1:=param_data[J(chain,t-1),i][,i]]
+  param_data[,acc := i!=i.l1]
+
+  # merge in temperature
+  param_data = ddply(param_data,.(chain), function(d) {
+    d$temp = me$priv$chain.states$tempering[[d$chain[1]]]
+    return(d)
+  })
+
+  if (!is.null(cols)) {
+
+    if (cols=='p') {
+      gdata = param_data[,c('temp','chain','acc','t',paste('p',me$cf$params_to_sample,sep='.'))]
+      colnames(gdata)  =  str_replace( colnames(gdata) ,'p.','')
+      return(data.table(gdata))
+    } 
+
+    if (cols=='m') {
+      gdata = param_data[,c('temp','chain','t','acc',paste('m',me$cf$moments_to_use,sep='.'))]
+      colnames(gdata)  =  str_replace( colnames(gdata) ,'m.','')
+      return(data.table(gdata))
+    }
+
+  }
+
+  gdata = melt(param_data,measure.vars=paste('p',me$cf$params_to_sample,sep='.'),id=c('t','chain','temp','acc'))
   gdata$variable = str_replace(gdata$variable,'p.','')
   return(data.table(gdata))
 }

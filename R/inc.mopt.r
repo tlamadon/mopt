@@ -372,7 +372,10 @@ runMOpt <- function(cf,autoload=TRUE) {
     eval_start = as.numeric(proc.time()[3])
     rd = evaluateParameters(ps,cf)
     eval_time  = as.numeric(proc.time()[3]) - eval_start
+
+    # SAVING VALUES
     if ( (i %% cf$save_freq)==1 & i>10 ) {
+      cat(sprintf("%d evals, saving to %s \n",i,cf$file_chain))
       save(cf,priv,param_data,file=cf$file_chain)      
     }
 
