@@ -42,3 +42,4 @@ Collate:
     'fun.util.r'
     'objfc.norm2.custom.r'
     'fun.econmetrics.r'
+    'objfc.norm2_kill_slow.r'
