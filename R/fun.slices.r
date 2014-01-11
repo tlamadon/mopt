@@ -116,7 +116,7 @@ plot.slices <- function(file=NULL,outpath='',type="png") {
   # we want to keep all submoments, value, param and param_value
 
 	if (is.null(file)) {
-		load('slices.RData')
+		load('est.slices.RData')
 	} else {
 		load(file)
 	}
