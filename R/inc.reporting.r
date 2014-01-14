@@ -277,19 +277,26 @@ predict.mopt_env <- function(me,what='p.all',base='') {
 #' \url{http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/}
 #' @param filename optional local filename
 #' @param remote optional. full \code{scp} path: username@your.remote.com:~/path/to/remote/file.dat
+#' @param reload NULL
 #' @export
 #' @examples
 #' \dontrun{
 #' me <- mopt.load(remote="hpc:git/wagebc/Rdata/evaluations.educ1.dat")
 #' predict(me,'p.sd')
 #' }
-mopt.load <- function(filename='',remote='') {
+mopt.load <- function(filename='',remote='',reload=NULL) {
 
   if (str_length(remote)>0) {
   # generate a local tmp file
     filename = tempfile()
     # get the file using scp
     system(paste('scp',remote,filename))
+  } 
+
+	if (!is.null(reload)) {
+    filename = tempfile()
+    # get the file using scp
+    system(paste('scp',reload$remote,filename))
   } 
 
   env = new.env()
