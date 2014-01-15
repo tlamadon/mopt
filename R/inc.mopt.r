@@ -286,11 +286,13 @@ prepare.mopt_config <- function(cf) {
       cf$mylbapply = mclapply;
       cf$N= pmin(detectCores(),cf$N)
     }
-  } else {
+  } else if (cf$mode == 'serial') {
     cf$mode = 'serial'
     cat('[mode=serial] NOT USING MPI !!!!! \n')    
     cf$mylapply  = lapply;
     cf$mylbapply = lapply;
+  } else {
+	  error(cat('your selected mode: ',cf$mode,' does not exist. please choose from mpi,mpiLB,multicore and serial'))
   }
   return(cf)
 }
