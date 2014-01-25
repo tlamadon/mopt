@@ -272,9 +272,27 @@ predict.mopt_env <- function(me,what='p.all',base='') {
   return(p)
 }
 
-#' loads a mopt config from file
-#' you can even refer to a remote file over ssh
+#' Load an existing mopt config
+#' 
+#' loads a mopt config from file. This is very useful
+#' for on-the-fly analysis of results that are generated
+#' on a remote machine, or to process results on your local machine.
+#' Fetching remote files requires a publickey authentication setup
+#' for ssh to the remote server. your connetion must
+#' work without having to type a password. It's easy
+#' to setup the ssh-agent and add a passphrase to an existing
+#' key. Preferably set up a config file for ssh. see the references.
+#' @references \url{https://help.github.com/articles/working-with-ssh-key-passphrases}
+#' \url{http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/}
+#' @param filename optional local filename
+#' @param remote optional. full \code{scp} path: username@your.remote.com:~/path/to/remote/file.dat
+#' @param reload NULL
 #' @export
+#' @examples
+#' \dontrun{
+#' me <- mopt.load(remote="hpc:git/wagebc/Rdata/evaluations.educ1.dat")
+#' predict(me,'p.sd')
+#' }
 mopt.load <- function(filename='',remote='',reload=NULL) {
 
   if (str_length(remote)>0) {
@@ -284,7 +302,7 @@ mopt.load <- function(filename='',remote='',reload=NULL) {
     system(paste('scp',remote,filename))
   } 
 
-  if (!is.null(reload)) {
+	if (!is.null(reload)) {
     filename = tempfile()
     # get the file using scp
     system(paste('scp',reload$remote,filename))
