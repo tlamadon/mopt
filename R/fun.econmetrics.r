@@ -36,3 +36,25 @@ score.mopt_env <- function(me) {
   return(M)
 }
 
+
+#' takes the best value, compute the score and
+#' the standard error using the sandwich formula
+#' @export
+estimate.mopt_env <- function(me) {
+
+  # get moments and compute diagonal matrix
+  mms = as.list(me$cf$data.moments$sd)
+  names(mms) = me$cf$data.moments$moment
+
+  S  = score.mopt_env(me)
+
+  VV = S %*% (diag( 1/as.numeric(mms[  me$cf$moments_to_use ] ))/1000^2) %*% t(S)
+
+  mm = melt(me,'p')
+  JJ = var(mm[temp==1,me$cf$params_to_sample,with=FALSE])
+
+  SE = JJ %*% VV %*% JJ
+
+  return(SE)
+
+}

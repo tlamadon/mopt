@@ -9,6 +9,6 @@
 }
 \seealso{
   Other algos: \code{\link{algo.bgp}},
-  \code{\link{algo.wl}}
+  \code{\link{algo.diffevo}}, \code{\link{algo.wl}}
 }
 

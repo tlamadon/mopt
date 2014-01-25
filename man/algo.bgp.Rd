@@ -8,6 +8,7 @@
   Baragatti Grimaud and Pommeret MCMC chain
 }
 \seealso{
-  Other algos: \code{\link{algo.mh}}, \code{\link{algo.wl}}
+  Other algos: \code{\link{algo.diffevo}},
+  \code{\link{algo.mh}}, \code{\link{algo.wl}}
 }
 

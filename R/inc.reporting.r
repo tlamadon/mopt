@@ -1,6 +1,6 @@
 #' generates different plots from a chain
 #' @export
-plot.mopt_env <- function(me,what='na',select='untempered',taildata=0) {
+plot.mopt_env <- function(me,what='na',select='untempered',varblack=c(),taildata=0) {
 
   mopt = me$cf
 
@@ -36,14 +36,20 @@ plot.mopt_env <- function(me,what='na',select='untempered',taildata=0) {
 
   # reporting the distributions of the parameters
   if ('pdistr' %in% what) {
-    
+
+    #param_data = data.frame(me$param_data)
+    dd = melt(me)[temp==1]
+    dd = dd[variable %in% me$cf$params_to_sample]
+    dd = dd[t > max(dd$t)/2]
+
     # we also want to append the best param value
     I = which(param_data$value == min(param_data$value,na.rm=TRUE))
     best_data = param_data[I,]
 
-    gp <- ggplot(melt(param_data,measure.vars=paste('p',mopt$params_to_sample,sep='.'),id=c()),aes(x=value)) +
-        geom_vline(aes(xintercept=value),data = melt(best_data,measure.vars=mopt$params_to_sample,id=c()),color='blue',linetype=2,size=0.3) +
-        stat_density(fill='blue',alpha=0.5) + facet_wrap(~variable,scales='free')
+    dd = dd[! variable %in% varblack]
+
+    gp <- ggplot(dd,aes(x=value)) +
+        geom_histogram(fill='blue',alpha=0.5) + facet_wrap(~variable,scales='free') + theme_bw()
     print(gp)
   }
 
@@ -126,8 +132,10 @@ plot.mopt_env <- function(me,what='na',select='untempered',taildata=0) {
 
   if ('ptime' %in% what) {
     #param_data = data.frame(me$param_data)
-    gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=paste('p',me$cf$params_to_sample,sep='.'),id=c('i','chain'))
-    gp <- ggplot(gdata,aes(x=i,color=chain,group=chain,y=value)) + 
+    dd = melt(me)[temp==1]
+    dd = dd[variable %in% me$cf$params_to_sample]
+
+    gp <- ggplot(dd,aes(x=t,color=chain,group=chain,y=value)) + 
       geom_point(size=0.5) + 
       geom_line(size=0.5) + 
       facet_wrap(~variable,scales='free') +
@@ -229,7 +237,7 @@ predict.mopt_env <- function(me,what='p.all',base='') {
   params_to_sample  = cf$params_to_sample
   params_to_sample2 = paste('p',cf$params_to_sample,sep='.')
   param_data = data.table(param_data)
-  cat(sprintf("value=%f evals=%i\n",param_data[I[1]]$value, nrow(param_data)))
+  cat(sprintf("value=%f evals=%i best=%i\n",param_data[I[1]]$value, nrow(param_data) , I[1]))
 
   if (what=='p.all') {
     pres = cf$initial_value
@@ -238,7 +246,8 @@ predict.mopt_env <- function(me,what='p.all',base='') {
   } 
 
   if (what=='p.sd') {
-    VV = sqrt(diag(cov(param_data[chain==1,params_to_sample2,with=FALSE])))
+    dd = melt(me,'p')
+    VV = sqrt(diag(cov(dd[temp==1,params_to_sample,with=FALSE])))
     p = c(param_data[I,params_to_sample2,with=FALSE])
     return(data.frame(name = cf$params_to_sample, value = unlist(p), sd = c(VV)))
   }
