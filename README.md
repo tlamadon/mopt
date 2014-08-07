@@ -1,7 +1,7 @@
 mopt
 ====
 
-Parallel Derivative Free Moment Optimization
+Parallel Derivative Free Moment Optimization in R
 
 This is a package intended for people who want to estimate a model based on some distance criteria. The library is built around the square minimization of the distance between a set of moments. The value of the objective function as well as the value of the moments at each evaluations are stored for later analysis. 
 
@@ -27,6 +27,10 @@ Wang, F. and Landau, D. Physical Review E  64  056101  (2001)
 ### Install
 
     install.packages('devtools');require(devtools);install_github('mopt',user='tlamadon')
+
+### See also
+
+A [Julia version of mopt exists as Julia.jl on github.](https://github.com/floswald/MOpt.jl)
 
 ### Contributors
 
