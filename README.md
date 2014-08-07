@@ -30,7 +30,7 @@ Wang, F. and Landau, D. Physical Review E  64  056101  (2001)
 
 ### See also
 
-A [Julia version of mopt exists as Julia.jl on github.](https://github.com/floswald/MOpt.jl)
+A [Julia version of mopt exists as MOpt.jl on github.](https://github.com/floswald/MOpt.jl)
 
 ### Contributors
 
