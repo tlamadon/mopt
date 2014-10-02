@@ -16,11 +16,6 @@
 #' @example examples/example-slices.r
 compute.slices <- function(mcf,ns=30,pad=0.1,file="est.slices.RData") {
 
-  # reading configuration
-  # =====================
-  pdesc = mcf$pdesc
-  p     = mcf$initial_value
-
   # storing the time
   # =============================
   last_time = as.numeric(proc.time()[3])
@@ -43,8 +38,8 @@ compute.slices <- function(mcf,ns=30,pad=0.1,file="est.slices.RData") {
     prange = seq( lb+(ub-lb)*pad/2,  lb+(ub-lb)*(1-pad/2) ,l=ns)
 
     # we put the values in a list of parameters
-	# TODO watch out as some of the cluster functions take vectors
-	# while others take lists.
+	  # TODO watch out as some of the cluster functions take vectors
+	  # while others take lists.
     ptmp =p2
     ps = list()
     j=0
@@ -59,11 +54,11 @@ compute.slices <- function(mcf,ns=30,pad=0.1,file="est.slices.RData") {
     
     cat('sending evaluations for ',pp,' in (', lb+(ub-lb)*pad/2,',',lb+(ub-lb)*(1-pad/2),')\n')
     
-	if (mcf$mode =='mpi'){
-		rs = clusterApplyLB(cl=mcf$cl,x=ps,fun=mopt_obj_wrapper,objfunc=mcf$objfunc)
-	} else {
-		rs = mcf$mylbapply(ps,mopt_obj_wrapper,objfunc=mcf$objfunc)
-	}
+  	if (mcf$mode =='mpi'){
+  		rs = clusterApplyLB(cl=mcf$cl,x=ps,fun=mopt_obj_wrapper,objfunc=mcf$objfunc)
+  	} else {
+  		rs = mcf$mylbapply(ps,mopt_obj_wrapper,objfunc=mcf$objfunc)
+  	}
 
     rr1 = data.frame()
     for ( jj in 1:length(rs) ) {
@@ -73,14 +68,15 @@ compute.slices <- function(mcf,ns=30,pad=0.1,file="est.slices.RData") {
 
       sm = rs[[jj]]$sm
       sm$names = paste('sm',sm$names,sep='.')
-      sm = daply(sm, .(names), function(d) {d$value[1]  })
+      sm = cast(sm, ~names)[-1]  #convert long to wide
 
       # get everything but the submoments
       rr1.tmp = data.frame( parvalue=prange[jj], 
-                            t(unlist(ps[[jj]])) , 
-                            t(unlist( rs[[jj]][setdiff(names(rs[[jj]]),c('sm','p','chain'))  ] ) ),
-                            t(sm))
-      rr1 = rbind(rr1, rr1.tmp);
+                            as.data.frame( ps[[jj]] ) , 
+                            as.data.frame( rs[[jj]][setdiff(names(rs[[jj]]),c('sm','p','chain'))] ),
+                            sm)
+
+      rr1 = rbind(rr1, rr1.tmp)
     }
 
     cat('got ', nrow(rr1), ' values\n')
@@ -165,16 +161,18 @@ plot.slices <- function(file=NULL,outpath='',type="png") {
 
   } else {
 
-	  gp <- ggplot(subset(rr.m,variable==pp & from=='model')) + geom_point(aes(x=param_value,y=value,color=conv),size=1) + 
+	  gp <- ggplot(subset(rr.m,variable==pp & from=='model')) + 
+      geom_point(aes(x=param_value,y=value,color=conv),size=1) + 
 		  geom_line(aes(x=param_value,y=value,group='param'),size=0.3) + 
-		  geom_vline(aes(xintercept=value),data=params.data,linetype=2,color='red') +
+		  geom_vline(aes(xintercept=value),data=init.param.data,linetype=2,color='red') +
 		  facet_wrap(~param,scales='free_x',ncol=3) +
-		  scale_y_continuous('objective function')+ scale_x_continuous('varying parameter') + theme_bw()
+		  scale_y_continuous('objective function')+ 
+      scale_x_continuous('varying parameter') + theme_bw()
 		#print(gp)
 		if (type=="png") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.png',sep=''),width=10.6, height=5.93)
 		if (type=="pdf") ggsave(paste(outpath,'plot_ParamVsMoment_',pp,'.pdf',sep=''),width=10.6, height=5.93)
   }
- }
+}
 
 
 
