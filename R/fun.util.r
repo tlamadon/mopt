@@ -52,7 +52,9 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
 	} else if (cf$mode=='mpiLB'){
 		vals <- clusterApplyLB(cf$cl,ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
 		#         vals <- parLapply(cf$cl,1:length(ps),function(j) mopt_obj_wrapper(ps[[j]],objfunc=cf$objfunc))
-	} else if (balance) {
+	} else if (cf$mode=='multicore') {
+    vals = mclapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam, mc.cores = cf$N ) 
+  } else if (balance) {
 		vals = cf$mylbapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
 	} else {
 	  vals = cf$mylapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
