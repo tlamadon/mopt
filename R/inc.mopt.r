@@ -201,7 +201,7 @@ prepare.mopt_config <- function(cf) {
     # creating the cluster
 	  # size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
     require(snow)  
-    cl <- makeCluster(type='MPI')
+    cl <- makeCluster(type='MPI',spec=cf$N)
 	  cf$cl <- cl	# add cluster to the config as well
 
 	  # worker roll call
