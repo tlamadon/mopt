@@ -55,11 +55,17 @@ compute.slices <- function(mcf,ns=30,pad=0.1,file="est.slices.RData") {
     cat('sending evaluations for ',pp,' in (', lb+(ub-lb)*pad/2,',',lb+(ub-lb)*(1-pad/2),')\n')
     
   	if (mcf$mode =='mpi'){
-  		rs = clusterApplyLB(cl=mcf$cl,x=ps,fun=mopt_obj_wrapper,objfunc=mcf$objfunc)
-  	} else {
-  		rs = mcf$mylbapply(ps,mopt_obj_wrapper,objfunc=mcf$objfunc)
-  	}
-
+  	#	rs = clusterApplyLB(cl=mcf$cl,x=ps,fun=mopt_obj_wrapper,objfunc=mcf$objfunc)
+  	#} else {
+  	#	rs = mcf$mylbapply(ps,mopt_obj_wrapper,objfunc=mcf$objfunc)
+  	#}
+      rs = mpi.parLapply(ps,mopt_obj_wrapper,objfunc=mcf$objfunc)
+    } else if (mcf$mode=='multicore') {
+      rs =      mclapply(ps,mopt_obj_wrapper,objfunc=mcf$objfunc,mc.cores = mcf$N ) 
+    } else {
+      rs =        lapply(ps,mopt_obj_wrapper,objfunc=mcf$objfunc)
+    }
+    
     rr1 = data.frame()
     for ( jj in 1:length(rs) ) {
       if (is.atomic(rs[[jj]])) next;

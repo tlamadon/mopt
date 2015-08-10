@@ -46,19 +46,26 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
     #save(ps,file='lasteval.dat')
 
     cat('Sending parameter evaluations...\n')
-	if (cf$mode=='mpi'){
-		vals <- parLapply(cf$cl,ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
-		#         vals <- parLapply(cf$cl,1:length(ps),function(j) mopt_obj_wrapper(ps[[j]],objfunc=cf$objfunc))
-	} else if (cf$mode=='mpiLB'){
-		vals <- clusterApplyLB(cf$cl,ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
-		#         vals <- parLapply(cf$cl,1:length(ps),function(j) mopt_obj_wrapper(ps[[j]],objfunc=cf$objfunc))
-	} else if (cf$mode=='multicore') {
-    vals = mclapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam, mc.cores = cf$N ) 
-  } else if (balance) {
-		vals = cf$mylbapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
-	} else {
-	  vals = cf$mylapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
-	}
+	  #if (cf$mode=='mpi'){
+	  #	vals <- parLapply(cf$cl,ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
+	  #	#         vals <- parLapply(cf$cl,1:length(ps),function(j) mopt_obj_wrapper(ps[[j]],objfunc=cf$objfunc))
+	  #} else if (cf$mode=='mpiLB'){
+	  #	vals <- clusterApplyLB(cf$cl,ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
+	  #	#         vals <- parLapply(cf$cl,1:length(ps),function(j) mopt_obj_wrapper(ps[[j]],objfunc=cf$objfunc))
+	  #} else if (cf$mode=='multicore') {
+    #  vals = mclapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam, mc.cores = cf$N ) 
+    #} else if (balance) {
+	  #	vals = cf$mylbapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
+	  #} else {
+	  #  vals = cf$mylapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
+	  #}
+    if (cf$mode=='mpi'){
+      vals = mpi.parLapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
+    } else if (cf$mode=='multicore') {
+      vals =      mclapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam, mc.cores = cf$N ) 
+    } else {
+      vals =        lapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
+    }
     cat('done\n')
 
     # process the return values 1 by 1

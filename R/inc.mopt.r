@@ -197,102 +197,101 @@ prepare.mopt_config <- function(cf) {
   if (cf$mode=='mpi') {
 
     cat('[mode=mpi] USING MPI !!!!! \n')
+    #using RMPI instead of SNOW which is not working with Econ HPC
+    #save .Rprofile into your working directory first
+    #it will initialize RMPI 
+    cf$N          = mpi.universe.size()-1
 
-    # creating the cluster
-	  # size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
-    require(snow)  
-    cl <- makeCluster(type='MPI',spec=cf$N)
-	  cf$cl <- cl	# add cluster to the config as well
+    ## creating the cluster
+	  ## size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
+    #require(snow)  
+    #cl <- makeCluster(type='MPI',spec=cf$N)
+	  #cf$cl <- cl	# add cluster to the config as well
 
-	  # worker roll call
-	 cf$num.worker <- length(clusterEvalQ(cl,Sys.info()))
-    dir.create(cf$logdir,showWarnings=FALSE)
-	  cat("Master: I've got",cf$num.worker,"workers\n")
-	  cat("Master: doing rollcall on cluster now ( ", file.path(cf$logdir,"rollcall.txt") ," )\n")
-	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
-    # setting up the slaves
-    cat("Master: setting directory and sourcing on slaves ( ",cf$wd,  cf$source_on_nodes ," )\n")
-    eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
-    eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
-    clusterCall(cl, rollcall, cf$logdir)
+	  ## worker roll call
+	  #cf$num.worker <- length(clusterEvalQ(cl,Sys.info()))
+    #dir.create(cf$logdir,showWarnings=FALSE)
+	  #cat("Master: I've got",cf$num.worker,"workers\n")
+	  #cat("Master: doing rollcall on cluster now ( ", file.path(cf$logdir,"rollcall.txt") ," )\n")
+	  #cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
+    ## setting up the slaves
+    #cat("Master: setting directory and sourcing on slaves ( ",cf$wd,  cf$source_on_nodes ," )\n")
+    #eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
+    #eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
+    #clusterCall(cl, rollcall, cf$logdir)
 
-    # adding the normal lapply
-    cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
+    ## adding the normal lapply
+    #cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
 
-    # adding the load balanced lapply
-    cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
-
-	cf$N = length(cl) 
-  
-  } else if (cf$mode=='mpiLB') {
-
-    cat('[mode=mpiLB] USING LOAD BALANCED MPI !!!!! \n')
-
-    # creating the cluster
-	  # size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
-    require(snow)  
-    cl <- makeCluster(type='MPI',spec=cf$N)
-	  cf$cl <- cl	# add cluster to the config as well
-
-	  # worker roll call
-	  cf$num.worker <- length(clusterEvalQ(cl,Sys.info()))
-    dir.create(cf$logdir,showWarnings=FALSE)
-	  cat("Master: I've got",cf$num.worker,"workers\n")
-	  cat("Master: doing rollcall on cluster now\n")
-	  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
-    
-    # setting up the slaves
-    eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
-    eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
-    clusterCall(cl, rollcall, cf$logdir)
-
-    # adding the normal lapply
-    cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
-
-    # adding the load balanced lapply
-    cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
-
-	if (cf$N <= length(cl)){
-		warning('benefits of Load Balancing on cluster only materialize\nif you set number of chains N > number of nodes')
-	}
-
+    ## adding the load balanced lapply
+    #cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
+	  #cf$N = length(cl) 
+  #} else if (cf$mode=='mpiLB') {
+  #  cat('[mode=mpiLB] USING LOAD BALANCED MPI !!!!! \n')
+  #
+  #  # creating the cluster
+	#  # size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
+  #  require(snow)  
+  #  cl <- makeCluster(type='MPI',spec=cf$N)
+	#  cf$cl <- cl	# add cluster to the config as well
+  #
+	#  # worker roll call
+	#  cf$num.worker <- length(clusterEvalQ(cl,Sys.info()))
+  #  dir.create(cf$logdir,showWarnings=FALSE)
+	#  cat("Master: I've got",cf$num.worker,"workers\n")
+	#  cat("Master: doing rollcall on cluster now\n")
+	#  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
+  #  
+  #  # setting up the slaves
+  #  eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
+  #  eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
+  #  clusterCall(cl, rollcall, cf$logdir)
+  #
+  #  # adding the normal lapply
+  #  cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
+  #
+  #  # adding the load balanced lapply
+  #  cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
+  #
+  #	if (cf$N <= length(cl)){
+  #		warning('benefits of Load Balancing on cluster only materialize\nif you set number of chains N > number of nodes')
+  #	}
   } else if (cf$mode=='multicore') {
     cat('[mode=mulicore] YEAH !!!!! \n')    
     require(parallel)
-    
-    if(Sys.info()[['sysname']]=='Windows') {
-      cl <- makeCluster(spec=pmin(detectCores(),cf$N),type='MPI')
-      
-      # worker roll call
-      dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
-      cat("Master: I've got",num.worker,"workers\n")
-      cat("Master: doing rollcall on cluster now\n")
-      cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$wd,"workers","rollcall.txt"),append=FALSE)
-      # setting up the slaves
-      eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
-      eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
-      clusterCall(cl, rollcall, file.path(cf$wd,"workers"))
-      
-      
-      # adding the normal lapply
-      cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
-      
-      # adding the load balanced lapply
-      cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
-      
-      cf$N = length(cl)
-    } else {
-      cf$mylapply  = mclapply;
-      cf$mylbapply = mclapply;
-      cf$N= pmin(detectCores(),cf$N)
-    }
+    cf$N= detectCores()-1
+
+    #if(Sys.info()[['sysname']]=='Windows') {
+    #  cl <- makeCluster(spec=pmin(detectCores(),cf$N),type='MPI')
+    #  
+    #  # worker roll call
+    #  dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
+    #  cat("Master: I've got",num.worker,"workers\n")
+    #  cat("Master: doing rollcall on cluster now\n")
+    #  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$wd,"workers","rollcall.txt"),append=FALSE)
+    #  # setting up the slaves
+    #  eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
+    #  eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
+    #  clusterCall(cl, rollcall, file.path(cf$wd,"workers"))
+    #  
+    #  
+    #  # adding the normal lapply
+    #  cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
+    #  
+    #  # adding the load balanced lapply
+    #  cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
+    #  
+    #  cf$N = length(cl)
+    #} else {
+    #  cf$mylapply  = mclapply;
+    #  cf$mylbapply = mclapply;
+    #  cf$N= pmin(detectCores(),cf$N)
+    #}
   } else if (cf$mode == 'serial') {
-    cf$mode = 'serial'
     cat('[mode=serial] NOT USING MPI !!!!! \n')    
-    cf$mylapply  = lapply;
-    cf$mylbapply = lapply;
   } else {
-	  error(cat('your selected mode: ',cf$mode,' does not exist. please choose from mpi,mpiLB,multicore and serial'))
+	  #error(cat('your selected mode: ',cf$mode,' does not exist. please choose from mpi,mpiLB,multicore and serial'))
+    error(cat('your selected mode: ',cf$mode,' does not exist. please choose from mpi,multicore and serial'))
   }
   return(cf)
 }
