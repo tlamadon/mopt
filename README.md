@@ -28,6 +28,10 @@ Wang, F. and Landau, D. Physical Review E  64  056101  (2001)
 
     install.packages('devtools');require(devtools);install_github('mopt',user='tlamadon')
 
+### Use MPI on UCL econ HPC
+ - [Install Rmpi on HPC](http://www.econr.org/InstallRmpi.html)
+ - [copy .Rprofile into your working directoy](https://github.com/floswald/parallelTest/tree/master/R/singleThread/ran-test/rmpi)	
+
 ### See also
 
 A [Julia version of mopt exists as MOpt.jl on github.](https://github.com/floswald/MOpt.jl)
