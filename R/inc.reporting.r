@@ -226,7 +226,7 @@ cat(STR,file=filename_make)
 #' @param what can be 'p.all' the best parameter set as a list, 'p.sd' for 
 #' sampled parameters with standard deviations based on coldest chain, 'm' for list of 
 #' simulated and data moments next to each other
-predict.mopt_env <- function(me,what='p.all',base='') {
+predict.mopt_env <- function(me,what='p.all',base='',sort=FALSE) {
 
 
   # first type, is to return the parameters with the highest value
@@ -255,7 +255,16 @@ predict.mopt_env <- function(me,what='p.all',base='') {
   if (what=='m') {
     mnames      = grep('m\\.',names(param_data),value=TRUE)
     sim.moments = data.frame(model = as.numeric(param_data[I,mnames,with=FALSE]), moment = str_replace(mnames,'m\\.',''))
-    sim.moments = merge(sim.moments,cf$data.moments,by='moment')
+    
+    if(sort==TRUE){ #round simulated data and sort the moments
+      sim.moments$model <- round(sim.moments$model,3)
+      true.moments <- cf$data.moments
+      true.moments$id <- 1:nrow(true.moments)
+      sim.moments = merge(sim.moments,true.moments,by='moment')
+      sim.moments = sim.moments[order(sim.moments$id), ]
+    }else{
+      sim.moments = merge(sim.moments,cf$data.moments,by='moment')
+    }
     return(sim.moments)
   }
 
