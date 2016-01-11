@@ -38,7 +38,7 @@ plot.mopt_env <- function(me,what='na',select='untempered',varblack=c(),taildata
   if ('pdistr' %in% what) {
 
     #param_data = data.frame(me$param_data)
-    dd = melt(me)[temp==1]
+    dd = melt.mopt_env(me)[temp==1]
     dd = dd[variable %in% me$cf$params_to_sample]
     dd = dd[t > max(dd$t)/2]
 
@@ -132,7 +132,7 @@ plot.mopt_env <- function(me,what='na',select='untempered',varblack=c(),taildata
 
   if ('ptime' %in% what) {
     #param_data = data.frame(me$param_data)
-    dd = melt(me)[temp==1]
+    dd = melt.mopt_env(me)[temp==1]
     dd = dd[variable %in% me$cf$params_to_sample]
 
     gp <- ggplot(dd,aes(x=t,color=chain,group=chain,y=value)) + 
@@ -181,7 +181,7 @@ plot.mopt_env <- function(me,what='na',select='untempered',varblack=c(),taildata
   }
 
   if ('pmv' %in% what) {
-    mm = melt(me)
+    mm = melt.mopt_env(me)
     gg <- ggplot(mm[,list(mean(value),sd(value)),list(chain,variable)],aes(x=chain,y=V1,ymin=V1-V2,ymax=V1+V2)) + 
             geom_pointrange() + facet_wrap(~variable,scales='free') + theme_bw()
     print(gg)
@@ -246,7 +246,7 @@ predict.mopt_env <- function(me,what='p.all',base='',sort=FALSE) {
   } 
 
   if (what=='p.sd') {
-    dd = melt(me,'p')
+    dd = melt.mopt_env(me,'p')
     VV = sqrt(diag(cov(dd[temp==1,params_to_sample,with=FALSE])))
     p = c(param_data[I,params_to_sample2,with=FALSE])
     return(data.frame(name = cf$params_to_sample, value = unlist(p), sd = c(VV)))
@@ -268,8 +268,14 @@ predict.mopt_env <- function(me,what='p.all',base='',sort=FALSE) {
     return(sim.moments)
   }
 
+  if (what=='sm') {
+    mnames      = grep('m\\.',names(param_data),value=TRUE)
+    sim.moments = data.frame(model = as.numeric(param_data[I,mnames,with=FALSE]), moment = str_replace(mnames,'m\\.',''))
+    return(sim.moments)
+  }
+
   if (what=='coda') {
-    mm = melt(me)
+    mm = melt.mopt_env(me)
     mcs = list()
     for (i in 1:5) {
       mmm = cast(mm[chain==i],t~variable)
@@ -337,7 +343,7 @@ melt.mopt_env <- function(me,cols=NULL) {
 
   # compute accept recject
   setkey(param_data,chain,t)
-  param_data[,i.l1:=param_data[J(chain,t-1),i][,i]]
+  param_data[,i.l1:=param_data[J(chain,t-1),i]]
   param_data[,acc := i!=i.l1]
 
   # merge in temperature
