@@ -222,6 +222,7 @@ cat(STR,file=filename_make)
 }
 
 #' return some versions of the parameters
+#'
 #' @export
 #' @param what can be 'p.all' the best parameter set as a list, 'p.sd' for 
 #' sampled parameters with standard deviations based on coldest chain, 'm' for list of 
@@ -300,7 +301,7 @@ predict.mopt_env <- function(me,what='p.all',base='',sort=FALSE) {
 #' @references \url{https://help.github.com/articles/working-with-ssh-key-passphrases}
 #' \url{http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/}
 #' @param filename optional local filename
-#' @param remote optional. full \code{scp} path: username@your.remote.com:~/path/to/remote/file.dat
+#' @param remote optional. full \code{scp} path: username at your.remote.com:~/path/to/remote/file.dat
 #' @param reload NULL
 #' @export
 #' @examples

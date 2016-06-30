@@ -127,6 +127,8 @@ datamoments <- function(names,values,sds) {
 # later it would be good to get the error message
 #  }
 
+#' wraper for the objective function. Made public for multicore
+#' @export 
 mopt_obj_wrapper <- function(p,objfunc=NA,errfile='param_error.dat') {
 	m = tryCatch( {
 
