@@ -266,8 +266,11 @@ prepare.mopt_config <- function(cf) {
     cluster <- makeMPIcluster(np)
     cf$cluster=cluster
     cf$N= np
+  } else if (cf$mode=='multicore2') {
+    cat('[mode=multicore2] we use makeCluster to allocate threads once and for all\n')    
+    cf$cluster = makeForkCluster(cf$N) 
   } else if (cf$mode=='multicore') {
-    cat('[mode=mulicore] YEAH !!!!! \n')    
+    cat('[mode=mulicore] threads will be re-allocated at each call \n')    
     require(parallel)
     cf$N= detectCores()-1
 

@@ -63,6 +63,8 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
       vals = mpi.parLapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
     } else if (cf$mode=='mpi2') {
       vals = parLapply(cf$cluster,ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
+    } else if (cf$mode=='multicore2') {
+      vals = parLapply(cf$cluster,ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
     } else if (cf$mode=='multicore') {
       vals = mclapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam, mc.cores = cf$N ) 
     } else {
