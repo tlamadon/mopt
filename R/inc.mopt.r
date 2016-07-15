@@ -258,6 +258,14 @@ prepare.mopt_config <- function(cf) {
   #	if (cf$N <= length(cl)){
   #		warning('benefits of Load Balancing on cluster only materialize\nif you set number of chains N > number of nodes')
   #	}
+  } else if (cf$mode=='mpi2') {
+    cat('[mode=mpi2] we use Rmpi, and we startup the cluster ourselves\n')    
+    library(Rmpi)
+    library(snow)
+    np <- mpi.universe.size() - 1
+    cluster <- makeMPIcluster(np)
+    cf$cluster=cluster
+    cf$N= np
   } else if (cf$mode=='multicore') {
     cat('[mode=mulicore] YEAH !!!!! \n')    
     require(parallel)
@@ -329,6 +337,7 @@ runMOpt <- function(cf,autoload=TRUE) {
   # saving all evaluations with param values
   # start from best last value
   if (file.exists(cf$file_chain) & autoload ) {
+    cat("loading automatically chain and config file from disk (because autoload=TRUE)")
     load(cf$file_chain)
     cf$run = cf$run +1
 
@@ -414,9 +423,10 @@ runMOpt <- function(cf,autoload=TRUE) {
   save(cf,priv,param_data,file=cf$file_chain)      
 
   # stopping the cluster using R snow command
-  #if (cf$USE_MPI) {
-  #  stopCluster(cl)
-  #}
+  if (cf$mode=='mpi2') {
+    stopCluster(cf$cluster)
+    mpi.exit()
+  }
 
   return(param_data)
 }

@@ -61,10 +61,12 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
 	  #}
     if (cf$mode=='mpi'){
       vals = mpi.parLapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
+    } else if (cf$mode=='mpi2') {
+      vals = parLapply(cf$cluster,ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
     } else if (cf$mode=='multicore') {
-      vals =      mclapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam, mc.cores = cf$N ) 
+      vals = mclapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam, mc.cores = cf$N ) 
     } else {
-      vals =        lapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
+      vals = lapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
     }
     cat('done\n')
 
