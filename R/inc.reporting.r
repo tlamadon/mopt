@@ -227,18 +227,24 @@ cat(STR,file=filename_make)
 #' @param what can be 'p.all' the best parameter set as a list, 'p.sd' for 
 #' sampled parameters with standard deviations based on coldest chain, 'm' for list of 
 #' simulated and data moments next to each other
-predict.mopt_env <- function(me,what='p.all',base='',sort=FALSE) {
+predict.mopt_env <- function(me,what='p.all',base='',sort=FALSE,quiet=F,ii=0) {
 
 
   # first type, is to return the parameters with the highest value
   cf = me$cf
   param_data = data.frame(me$param_data)
-  I = which(param_data$value == min(param_data$value,na.rm=TRUE))[[1]]
+  if (ii==0) {
+    I = which(param_data$value == min(param_data$value,na.rm=TRUE))[[1]]
+  } else {
+    I = ii
+  }
 
   params_to_sample  = cf$params_to_sample
   params_to_sample2 = paste('p',cf$params_to_sample,sep='.')
   param_data = data.table(param_data)
-  cat(sprintf("value=%f evals=%i best=%i\n",param_data[I[1]]$value, nrow(param_data) , I[1]))
+  if (quiet==FALSE) {
+    cat(sprintf("value=%f evals=%i best=%i\n",param_data[I[1]]$value, nrow(param_data) , I[1]))
+  }
 
   if (what=='p.all') {
     pres = cf$initial_value

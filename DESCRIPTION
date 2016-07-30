@@ -43,3 +43,4 @@ Collate:
     'objfc.norm2.custom.r'
     'fun.econmetrics.r'
     'algo.diffevolution.r'
+RoxygenNote: 5.0.1
