@@ -10,6 +10,7 @@ algo.gibbs <- function(rd,param_data,niter,cf,pdesc,priv) {
   params_to_sample  = cf$params_to_sample
   params_to_sample2 = paste('p',cf$params_to_sample,sep='.')
   N                 = cf$N
+  rd$run=cf$i
   
   rr = data.frame()
   # if param_data is empty then we accept all
