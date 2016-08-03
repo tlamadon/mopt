@@ -61,7 +61,7 @@ algo.gibbs <- function(rd,param_data,niter,cf,pdesc,priv) {
   param = sample(setdiff(cf$params_to_sample,curp), 1)
   grid = sort(cf$pdesc[param,'lb'] + (cf$pdesc[param,'ub']-cf$pdesc[param,'lb'])* ((seq(1/N,1,l=N) + rnorm(1)) %% 1))
   priv$current_param = param
-  flog.info("nest param to evaluate: %s",param)
+  flog.info("next param to evaluate: %s",param)
 
   # the next evaluations are just a uniform sequence from the bounds
   val_new = rd[rd$chain==new_param_i,]
