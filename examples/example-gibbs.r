@@ -3,7 +3,7 @@ require(mopt)
 library(ggplot2)
 
 # let's take a dummy objective function
-MOPT_OBJ_FUNC <- objfc.norm2(c(0,0),ns=2000)
+MOPT_OBJ_FUNC <- objfc.norm2(c(0,0),ns=2000,failp = 0.2)
 
 # starting parameters
 p <- list(x1=0.5,x2=0.5)

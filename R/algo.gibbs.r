@@ -35,7 +35,7 @@ algo.gibbs <- function(rd,param_data,niter,cf,pdesc,priv) {
   
   # we draw the new parameter value according to the posterior probabilities
   # that we just computed
-  new_param_i = sample.int(nrow(rd),1,prob=exp(-temper*rd$value))
+  new_param_i = sample(rd$chain,1,prob=exp(-temper*rd$value))
   best = rd[rd$chain==new_param_i,]
   best$chain=0
   rr = rbind(rr,best)
@@ -45,12 +45,15 @@ algo.gibbs <- function(rd,param_data,niter,cf,pdesc,priv) {
     sel = rep(" ",N)
     sel[new_param_i]="*"
     flog.info("evaluations for %s (temper=%f) ",priv$current_param,temper)
-    v = sprintf("%+3.3f%s",as.numeric(rd[paste("p.",priv$current_param,sep="")][,1]),sel)
-    flog.info("x= %s", paste(v,collapse="  "))
-    v = sprintf("%+3.3f%s",as.numeric(rd["value"][,1]),sel)
-    flog.info("f= %s",paste(v,collapse="  "))
-    v = sprintf("%+3.3f%s",exp(-temper*rd$value)/sum(exp(-temper*rd$value)),sel)
-    flog.info("p= %s",paste(v,collapse="  "))
+    v = rep(0,N)
+    v[rd$chain] = as.numeric(rd[paste("p.",priv$current_param,sep="")][,1])
+    flog.info("x= %s", paste(sprintf("%+3.3f%s",v,sel),collapse="  "))
+    
+    v[rd$chain] = as.numeric(rd["value"][,1])
+    flog.info("f= %s", paste(sprintf("%+3.3f%s",v,sel),collapse="  "))
+    
+    v[rd$chain] = exp(-temper*rd$value)/sum(exp(-temper*rd$value))
+    flog.info("p= %s", paste(sprintf("%+3.3f%s",v,sel),collapse="  "))
   }
   
   # change tempering

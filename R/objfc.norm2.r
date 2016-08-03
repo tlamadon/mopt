@@ -8,13 +8,18 @@ require(MASS)
 #' @examples
 #' myfunc <- objfc.norm2(c(0,0))
 #' myfunc(list(m1=0,m2=0))
-objfc.norm2 <- function(mu=c(0,0),sigma=diag(2),ns=50) {
+objfc.norm2 <- function(mu=c(0,0),sigma=diag(2),ns=50,failp=0) {
 
   obj <- function(p,ms=c()) {
 
 	  t1 <- proc.time()[3]
 	  stopifnot(is.list(p))	# we require p be a list
 
+	  # through an expection sometimes
+	  if (runif(1)<failp) {
+	    return(NA)
+	  }
+	  
 	  # simulate moments 
 	  x <- unlist(p[c('x1','x2')]) 	# however rmultnorm doesn't take lists.
 	  moments = apply( mvrnorm(n=ns, x, Sigma=sigma) ,2,mean)
