@@ -15,9 +15,10 @@ mcf$wd               = getwd()
 mcf$params_to_sample = c('x1','x2')
 mcf$moments_to_use   = c('m1','m2')
 mcf$mode             = 'serial'
-mcf$iter             = 30
+mcf$iter             = 100
 mcf$algo             = algo.gibbs
 mcf$objfunc          = MOPT_OBJ_FUNC
+mcf$shock_var        = 10
 
 # set the parameter bounds
 mcf <- mcf + 
@@ -46,6 +47,5 @@ ggplot(subset(res,chain==0),aes(x=p.x1,y=p.x2)) + geom_point()  + theme_bw()
 ggplot(subset(res,chain==0),aes(x=run)) + 
   geom_line(aes(y=p.x1)) + geom_line(aes(y=p.x2)) + theme_bw()
 
-print(res)
 
 
