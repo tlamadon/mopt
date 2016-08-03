@@ -38,7 +38,7 @@ algo.gibbs <- function(rd,param_data,niter,cf,pdesc,priv) {
   new_param_i = sample(rd$chain,1,prob=exp(-temper*rd$value))
   best = rd[rd$chain==new_param_i,]
   best$chain=0
-  rr = rbind(rr,best)
+  rr = rbind(rd,best)
 
   # we display the evaluations
   if ("current_param"%in%names(priv)) {
@@ -69,9 +69,6 @@ algo.gibbs <- function(rd,param_data,niter,cf,pdesc,priv) {
   # the next evaluations are just a uniform sequence from the bounds
   val_new = rd[rd$chain==new_param_i,]
   for (c.current in 1:N) {
-    # store the realisation
-    rr = rbind(rr,rd[rd$chain==c.current,])
-    
     # compute new parameter
     p.new = cf$initial_value
     p.new$chain = c.current
