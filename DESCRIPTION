@@ -26,7 +26,8 @@ Depends:
     parallel,
     minqa,
     MSBVAR,
-    locfit
+    locfit,
+    futile.logger
 LazyLoad: yes
 Collate:
     'mopt-package.r'
