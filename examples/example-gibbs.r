@@ -15,10 +15,10 @@ mcf$wd               = getwd()
 mcf$params_to_sample = c('x1','x2')
 mcf$moments_to_use   = c('m1','m2')
 mcf$mode             = 'serial'
-mcf$iter             = 100
+mcf$iter             = 25
 mcf$algo             = algo.gibbs
 mcf$objfunc          = MOPT_OBJ_FUNC
-mcf$shock_var        = 10
+mcf$shock_var        = 100
 
 # set the parameter bounds
 mcf <- mcf + 

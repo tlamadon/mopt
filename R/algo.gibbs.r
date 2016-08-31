@@ -10,6 +10,7 @@ algo.gibbs <- function(rd,param_data,niter,cf,pdesc,priv) {
   params_to_sample  = cf$params_to_sample
   params_to_sample2 = paste('p',cf$params_to_sample,sep='.')
   N                 = cf$N
+  rd$run=cf$i
   
   rr = data.frame()
   # if param_data is empty then we accept all
@@ -42,7 +43,7 @@ algo.gibbs <- function(rd,param_data,niter,cf,pdesc,priv) {
   }
   best = rd[rd$chain==new_param_i,]
   best$chain=0
-  rr = rbind(rr,best)
+  rr = rbind(rd,best)
 
   # we display the evaluations
   if ("current_param"%in%names(priv)) {
@@ -73,9 +74,6 @@ algo.gibbs <- function(rd,param_data,niter,cf,pdesc,priv) {
   # the next evaluations are just a uniform sequence from the bounds
   val_new = rd[rd$chain==new_param_i,]
   for (c.current in 1:N) {
-    # store the realisation
-    rr = rbind(rr,rd[rd$chain==c.current,])
-    
     # compute new parameter
     p.new = cf$initial_value
     p.new$chain = c.current
