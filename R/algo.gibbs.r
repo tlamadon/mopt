@@ -35,7 +35,11 @@ algo.gibbs <- function(rd,param_data,niter,cf,pdesc,priv) {
   
   # we draw the new parameter value according to the posterior probabilities
   # that we just computed
-  new_param_i = sample(rd$chain,1,prob=exp(-temper*rd$value))
+  if (length(rd$value)==1) {
+    new_param_i = 1
+  } else {
+    new_param_i = sample(rd$chain,1,prob=exp(-temper*rd$value))
+  }
   best = rd[rd$chain==new_param_i,]
   best$chain=0
   rr = rbind(rr,best)
