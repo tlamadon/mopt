@@ -45,4 +45,5 @@ Collate:
     'fun.econmetrics.r'
     'algo.diffevolution.r'
     'algo.gibbs.r'
+    'algo.slicemax.R'
 RoxygenNote: 5.0.1

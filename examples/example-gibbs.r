@@ -16,7 +16,7 @@ mcf$params_to_sample = c('x1','x2')
 mcf$moments_to_use   = c('m1','m2')
 mcf$mode             = 'serial'
 mcf$iter             = 25
-mcf$algo             = algo.gibbs
+mcf$algo             = algo.slicemax
 mcf$objfunc          = MOPT_OBJ_FUNC
 mcf$shock_var        = 100
 
