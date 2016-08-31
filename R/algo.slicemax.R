@@ -24,10 +24,13 @@ algo.slicemax <- function(rd,param_data,niter,cf,pdesc,priv) {
 
   if ("current_param" %in% names(priv)) {
     curp = priv$current_param
+    curp.list = priv$curp.list
   } else {
     curp="none"
+    curp.list = rep(0,length(cf$params_to_sample))
+    names(curp.list) = cf$params_to_sample
   }  
-  
+
   if ("current_best_par" %in% names(priv)) {
     current_best_par = priv$current_best_par
     current_best_val = priv$current_best_val
@@ -61,13 +64,16 @@ algo.slicemax <- function(rd,param_data,niter,cf,pdesc,priv) {
     flog.info("f= %s", paste(sprintf("%+3.3f%s",v,sel),collapse="  "))
   }
   
-  # we randomly select a parameter
-  param = sample(setdiff(cf$params_to_sample,curp), 1)
+  # we randomly select a parameter from the least evaluates once
+  I = which(curp.list <= min(curp.list)+1)
+  param = sample(names(curp.list)[I], 1)
   grid = sort(cf$pdesc[param,'lb'] + (cf$pdesc[param,'ub']-cf$pdesc[param,'lb'])* ((seq(1/N,1,l=N) + rnorm(1)) %% 1))
 
   priv$current_param = param
   priv$current_best_par = current_best_par
   priv$current_best_val = current_best_val
+  curp.list[[param]] = curp.list[[param]] + 1
+  priv$curp.list = curp.list
   
   flog.info("next param to evaluate: %s",param)
 
