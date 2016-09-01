@@ -36,6 +36,7 @@ algo.slicemax <- function(rd,param_data,niter,cf,pdesc,priv) {
     current_best_val = priv$current_best_val
   } else {
     current_best_val = Inf
+    current_best_par = rd[1,]
   }  
   
   # select the best new value
@@ -45,6 +46,8 @@ algo.slicemax <- function(rd,param_data,niter,cf,pdesc,priv) {
     flog.info("best new evaluation is better, we use it as new center (%f > %f)",current_best_val,rd$value[rd$chain==new_param_i])
     current_best_par = rd[rd$chain==new_param_i,]
     current_best_val = current_best_par$value
+  } else {
+    flog.info("best new evaluation is not better, we keep old one")
   }
   
   best = current_best_par
