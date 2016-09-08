@@ -34,20 +34,25 @@ algo.slicemax <- function(rd,param_data,niter,cf,pdesc,priv) {
   if ("current_best_par" %in% names(priv)) {
     current_best_par = priv$current_best_par
     current_best_val = priv$current_best_val
+    best_in_row = priv$best_in_row
   } else {
     current_best_val = Inf
     current_best_par = rd[1,]
+    best_in_row = 0
   }  
   
   # select the best new value
   new_param_i = rd$chain[which.min(rd$value)]
   # compare this to the previous evaluation
+  if (curp!="none") flog.info("previous evaluation: value=%f param=%f",current_best_par$value,current_best_par[[paste("p",curp,sep=".")]])
   if (rd$value[rd$chain==new_param_i] < current_best_val) {
-    flog.info("best new evaluation is better, we use it as new center (%f > %f)",current_best_val,rd$value[rd$chain==new_param_i])
+    flog.info("best new evaluation is better, we use it as new center (old:%f > new:%f)",current_best_val,rd$value[rd$chain==new_param_i])
     current_best_par = rd[rd$chain==new_param_i,]
     current_best_val = current_best_par$value
+    best_in_row = 0
   } else {
-    flog.info("best new evaluation is not better, we keep old one")
+    best_in_row = best_in_row + 1
+    flog.info("best new evaluation is not better, we keep old one (old:%f > new:%f) (best in row:%i)",current_best_val,rd$value[rd$chain==new_param_i],best_in_row)
   }
   
   best = current_best_par
@@ -68,7 +73,7 @@ algo.slicemax <- function(rd,param_data,niter,cf,pdesc,priv) {
   }
   
   # we randomly select a parameter from the least evaluates once
-  I = which(curp.list <= min(curp.list)+1)
+  I = which(curp.list <= min(curp.list))
   param = sample(names(curp.list)[I], 1)
   grid = sort(cf$pdesc[param,'lb'] + (cf$pdesc[param,'ub']-cf$pdesc[param,'lb'])* ((seq(1/N,1,l=N) + rnorm(1)) %% 1))
 
@@ -77,6 +82,7 @@ algo.slicemax <- function(rd,param_data,niter,cf,pdesc,priv) {
   priv$current_best_val = current_best_val
   curp.list[[param]] = curp.list[[param]] + 1
   priv$curp.list = curp.list
+  priv$best_in_row = best_in_row
   
   flog.info("next param to evaluate: %s",param)
 
