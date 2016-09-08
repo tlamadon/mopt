@@ -19,6 +19,7 @@ mcf$iter             = 25
 mcf$algo             = algo.slicemax
 mcf$objfunc          = MOPT_OBJ_FUNC
 mcf$shock_var        = 100
+mcf$start_time       = Sys.time()
 
 # set the parameter bounds
 mcf <- mcf + 
