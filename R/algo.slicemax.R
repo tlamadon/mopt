@@ -61,15 +61,15 @@ algo.slicemax <- function(rd,param_data,niter,cf,pdesc,priv) {
 
   # we display the evaluations
   if ("current_param"%in%names(priv)) {
-    sel = rep(" ",N)
-    sel[new_param_i]="*"
+    sel = rep("  ",N)
+    sel[new_param_i]="**"
     flog.info("evaluations for %s",priv$current_param)
     v = rep(0,N)
     v[rd$chain] = as.numeric(rd[paste("p.",priv$current_param,sep="")][,1])
-    flog.info("x= %s", paste(sprintf("%+3.3f%s",v,sel),collapse="  "))
+    flog.info("x= %s", paste(sprintf("%+8.2g%s",v,sel),collapse=" ")) # %12.6g
     
     v[rd$chain] = as.numeric(rd["value"][,1])
-    flog.info("f= %s", paste(sprintf("%+3.3f%s",v,sel),collapse="  "))
+    flog.info("f= %s", paste(sprintf("%+8.2g%s",v,sel),collapse=" "))
   }
   
   # we randomly select a parameter from the least evaluates once

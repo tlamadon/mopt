@@ -20,6 +20,7 @@ mcf$algo             = algo.slicemax
 mcf$objfunc          = MOPT_OBJ_FUNC
 mcf$shock_var        = 100
 mcf$start_time       = Sys.time()
+mcf$start_gitsha     = system("if [ -d .git ]; then git log --pretty=format:'%h' -n 1; else echo 'none';fi",intern = T)
 
 # set the parameter bounds
 mcf <- mcf + 
