@@ -66,8 +66,8 @@ plot.mopt_env <- function(me,what='na',select='untempered',varblack=c(),taildata
     gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=mnames,id=c('objvalue'))
     gdata$variable = gsub('submoments.','',gdata$variable)
     save(gdata,file='tmp.dat')
-    gp <- ggplot(gdata,aes(x=value)) + 
-          geom_density(fill='blue',alpha=0.4,size=0) + 
+    gp <- ggplot(gdata,aes(x=value)) +
+          geom_density(fill='blue',alpha=0.4,size=0) +
           geom_vline(aes(xintercept=value),
                      data=data.frame(variable=mopt$data.moments$moment,
                                      value   =mopt$data.moments$value),
@@ -107,7 +107,7 @@ plot.mopt_env <- function(me,what='na',select='untempered',varblack=c(),taildata
     print(ggt);
   }
 
-  # moment table 
+  # moment table
   if ('pmreg' %in% what) {
     RHS = paste('log(',mopt$params_to_sample,')',sep= '',collapse=' + ')
     rr = data.frame()
@@ -135,9 +135,9 @@ plot.mopt_env <- function(me,what='na',select='untempered',varblack=c(),taildata
     dd = melt.mopt_env(me)[temp==1]
     dd = dd[variable %in% me$cf$params_to_sample]
 
-    gp <- ggplot(dd,aes(x=t,color=chain,group=chain,y=value)) + 
-      geom_point(size=0.5) + 
-      geom_line(size=0.5) + 
+    gp <- ggplot(dd,aes(x=t,color=chain,group=chain,y=value)) +
+      geom_point(size=0.5) +
+      geom_line(size=0.5) +
       facet_wrap(~variable,scales='free') +
       theme_bw()
     print(gp)
@@ -148,8 +148,8 @@ plot.mopt_env <- function(me,what='na',select='untempered',varblack=c(),taildata
     param_data$t = c(1:nrow(param_data))
     gdata = melt(rename(param_data,c(value='objvalue')),measure.vars=mnames,id=c('t','chain'))
     gdata$variable = gsub('submoments.','',gdata$variable)
-    gp <- ggplot(gdata,aes(x=t,y=value)) + 
-          geom_point(size=0.5) + 
+    gp <- ggplot(gdata,aes(x=t,y=value)) +
+          geom_point(size=0.5) +
           geom_hline(aes(yintercept=value,x=NULL,y=NULL),
                      data=data.frame(value = mopt$moments.data,
                      variable=names(mopt$moments.data)),
@@ -166,7 +166,7 @@ plot.mopt_env <- function(me,what='na',select='untempered',varblack=c(),taildata
     rr = data.frame(from='model',moment = rownames(rr),value = c(rr),sd=NA)
     rr = subset(rr,str_detect(rr$moment,'submoments.model'))
     rr$moment = str_replace( rr$moment,'submoments\\.model\\.','')
-   
+
     dd = mopt$data.moments
     dd = subset(dd,moment %in% rr$moment)
     dd$from = 'data'
@@ -182,7 +182,7 @@ plot.mopt_env <- function(me,what='na',select='untempered',varblack=c(),taildata
 
   if ('pmv' %in% what) {
     mm = melt.mopt_env(me)
-    gg <- ggplot(mm[,list(mean(value),sd(value)),list(chain,variable)],aes(x=chain,y=V1,ymin=V1-V2,ymax=V1+V2)) + 
+    gg <- ggplot(mm[,list(mean(value),sd(value)),list(chain,variable)],aes(x=chain,y=V1,ymin=V1-V2,ymax=V1+V2)) +
             geom_pointrange() + facet_wrap(~variable,scales='free') + theme_bw()
     print(gg)
   }
@@ -192,8 +192,8 @@ plot.mopt_env <- function(me,what='na',select='untempered',varblack=c(),taildata
 #' print method for mopt_env
 #' @export
 print.mopt_env <- function(me) {
-  cat(sprintf(" %3.d chains / %5.d evaluations / %3.d parameters estimated" , 
-          me$param_data[,length(unique(chain))], me$param_data[,max(t)] , length(me$cf$params_to_sample))) 
+  cat(sprintf(" %3.d chains / %5.d evaluations / %3.d parameters estimated" ,
+          me$param_data[,length(unique(chain))], me$param_data[,max(t)] , length(me$cf$params_to_sample)))
 }
 
 
@@ -208,14 +208,14 @@ if (file.exists(cf$file_chain)) {
 
 # creating and saving the make file
 STR = 'runmpi:
-	qsub qsub_start_mpi.sh 
+	qsub qsub_start_mpi.sh
 
 clean:
 	rm -rf *.out *.rout
 
 tail:
 	tail -f ./mpi_PROJECTNAME.out
-'  
+'
 STR = gsub('PROJECTNAME',name,STR)
 cat(STR,file=filename_make)
 
@@ -224,8 +224,8 @@ cat(STR,file=filename_make)
 #' return some versions of the parameters
 #'
 #' @export
-#' @param what can be 'p.all' the best parameter set as a list, 'p.sd' for 
-#' sampled parameters with standard deviations based on coldest chain, 'm' for list of 
+#' @param what can be 'p.all' the best parameter set as a list, 'p.sd' for
+#' sampled parameters with standard deviations based on coldest chain, 'm' for list of
 #' simulated and data moments next to each other
 predict.mopt_env <- function(me,what='p.all',base='',sort=FALSE,quiet=F,ii=0) {
 
@@ -250,7 +250,12 @@ predict.mopt_env <- function(me,what='p.all',base='',sort=FALSE,quiet=F,ii=0) {
     pres = cf$initial_value
     pres[params_to_sample] = param_data[I,params_to_sample2,with=FALSE]
     return(pres)
-  } 
+  }
+
+  if (what=='p.nosd') {
+    p = c(param_data[I,params_to_sample2,with=FALSE])
+    return(data.frame(name = cf$params_to_sample, value = unlist(p)))
+  }
 
   if (what=='p.sd') {
     dd = melt.mopt_env(me,'p')
@@ -262,7 +267,7 @@ predict.mopt_env <- function(me,what='p.all',base='',sort=FALSE,quiet=F,ii=0) {
   if (what=='m') {
     mnames      = grep('m\\.',names(param_data),value=TRUE)
     sim.moments = data.frame(model = as.numeric(param_data[I,mnames,with=FALSE]), moment = str_replace(mnames,'m\\.',''))
-    
+
     if(sort==TRUE){ #round simulated data and sort the moments
       sim.moments$model <- round(sim.moments$model,3)
       true.moments <- cf$data.moments
@@ -295,7 +300,7 @@ predict.mopt_env <- function(me,what='p.all',base='',sort=FALSE,quiet=F,ii=0) {
 }
 
 #' Load an existing mopt config
-#' 
+#'
 #' loads a mopt config from file. This is very useful
 #' for on-the-fly analysis of results that are generated
 #' on a remote machine, or to process results on your local machine.
@@ -322,13 +327,13 @@ mopt.load <- function(filename='',remote='',reload=NULL) {
     filename = tempfile()
     # get the file using scp
     system(paste('scp',remote,filename))
-  } 
+  }
 
 	if (!is.null(reload)) {
     filename = tempfile()
     # get the file using scp
     system(paste('scp',reload$remote,filename))
-  } 
+  }
 
   env = new.env()
   load(filename,envir=env)
@@ -341,7 +346,7 @@ mopt.load <- function(filename='',remote='',reload=NULL) {
 }
 
 #' melts data with only sampled parameters
-#' if set cols='m' or cols='p' extract the wide format with 
+#' if set cols='m' or cols='p' extract the wide format with
 #' only parameters or only moments
 #' @export
 melt.mopt_env <- function(me,cols=NULL) {
@@ -365,7 +370,7 @@ melt.mopt_env <- function(me,cols=NULL) {
       gdata = param_data[,c('objvalue','temp','chain','acc','t',paste('p',me$cf$params_to_sample,sep='.'))]
       colnames(gdata)  =  str_replace( colnames(gdata) ,'p\\.','')
       return(data.table(gdata))
-    } 
+    }
 
     if (cols=='m') {
       gdata = param_data[,c('objvalue','temp','chain','t','acc',paste('m',me$cf$moments_to_use,sep='.'))]
