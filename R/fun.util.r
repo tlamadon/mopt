@@ -3,17 +3,20 @@
 fitMirror <- function (x,LB=NA,UB=NA) {
   test1 = TRUE
   test2 = TRUE
+
+  if(is.na(x)) return(x)
+
   while( test1 | test2) {
     if ( !is.na(UB) & (x>UB)) {
-      x = 2*UB - x 
+      x = 2*UB - x
     } else {
       test1 = FALSE
-    } 
+    }
     if ( !is.na(LB) & (x<LB)) {
       x = 2*LB - x
     } else {
       test2 = FALSE
-    } 
+    }
   }
  return(x)
 }
@@ -33,7 +36,7 @@ checkEvalStructure <- function(val,cf) {
 #' Evaluate objective function at N candidate parameter vectors
 #'
 #' Evaluates the objective function at N different value of the parameter vector.
-#' Depending on the configuration given in cf, evaluation is serial, parallel using multicore, 
+#' Depending on the configuration given in cf, evaluation is serial, parallel using multicore,
 #' or using MPI on a cluster.
 #' @param ps list of length N. each component is another list representing a particular value
 #' of the parameter vector.
@@ -41,7 +44,7 @@ checkEvalStructure <- function(val,cf) {
 #' @return a data.frame
 #' @export
 evaluateParameters <- function(ps,cf,balance=FALSE) {
-    
+
     #save evaluations to file
     #save(ps,file='lasteval.dat')
 
@@ -53,7 +56,7 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
 	  #	vals <- clusterApplyLB(cf$cl,ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
 	  #	#         vals <- parLapply(cf$cl,1:length(ps),function(j) mopt_obj_wrapper(ps[[j]],objfunc=cf$objfunc))
 	  #} else if (cf$mode=='multicore') {
-    #  vals = mclapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam, mc.cores = cf$N ) 
+    #  vals = mclapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam, mc.cores = cf$N )
     #} else if (balance) {
 	  #	vals = cf$mylbapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
 	  #} else {
@@ -66,7 +69,7 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
     } else if (cf$mode=='multicore2') {
       vals = parLapply(cf$cluster,ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
     } else if (cf$mode=='multicore') {
-      vals = mclapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam, mc.cores = cf$N ) 
+      vals = mclapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam, mc.cores = cf$N )
     } else {
       vals = lapply(ps,mopt_obj_wrapper,objfunc = cf$objfunc,errfile=cf$file_errorparam)
     }
@@ -116,7 +119,7 @@ evaluateParameters <- function(ps,cf,balance=FALSE) {
 		stopifnot(nrow(rd.infos)==1)
         rd = cbind(rd,rd.infos)
 	  }
-      
+
 	  # get the moments
       if (!is.null(val$sm) & nrow(val$sm)>0) {
         rd.sm = val$sm$value
@@ -152,19 +155,19 @@ getParamStructure <- function() {
 #'
 #' for a given MOPT configuration, compute N starting values. A starting value is a disturbation of
 #' the supplied starting parameter vector p. This way we generate one starting value for each of N chains.
-#' The chains differ in that in each chain a different subset of parameters from the initial parameter 
+#' The chains differ in that in each chain a different subset of parameters from the initial parameter
 #' vector is randomly disturbed.
 #' @param N number of chains
-#' @param cf an object of class mopt_config; a list 
+#' @param cf an object of class mopt_config; a list
 #' @return a list of length N, each containing a randomly perturbed version of starting vector p.
 #' @export
 computeInitialCandidates <- function(N,cf) {
   ps = list()
   # generate N guesses
   for (j in 1:N) {
-    np = cf$initial_value 
+    np = cf$initial_value
 
-    # pick some parameters to update 
+    # pick some parameters to update
     param <- sample(cf$params_to_sample, cf$np_shock)
 
     for (pp in param) {
@@ -174,9 +177,9 @@ computeInitialCandidates <- function(N,cf) {
 
     np$chain = j
     ps[[j]] <- np
-  }  
+  }
   return(ps)
-}  
+}
 
 #' @export
 shockp <- function(name,value,shocksd,cf) {
@@ -195,7 +198,7 @@ shockallp <- function(p,shocksd,VV,cf) {
   for (pp in colnames(sh)) {
     p[[pp]] = fitMirror( p[[pp]] + sh[,pp] ,
                               LB = cf$pdesc[pp,'lb'],
-                              UB = cf$pdesc[pp,'ub'])  
+                              UB = cf$pdesc[pp,'ub'])
   }
 
   return(p)
@@ -208,7 +211,7 @@ jumpParams.normalAndMirrored <- function(p,shocksd,VV,params.desc) {
   for (pp in colnames(sh)) {
     p[[pp]] = fitMirror( p[[pp]] + sh[,pp] ,
                               LB = params.desc[pp,'lb'],
-                              UB = params.desc[pp,'ub'])  
+                              UB = params.desc[pp,'ub'])
   }
 
   return(p)
