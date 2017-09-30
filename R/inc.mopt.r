@@ -270,8 +270,11 @@ prepare.mopt_config <- function(cf) {
     cat('[mode=mpi3] we use Rmpi, and we set worker number N in advance\n')
     library(Rmpi)
     library(snow)
-    cluster <- makeMPIcluster(cf$N)
-    cf$cluster=cluster
+    #cluster <- makeMPIcluster(cf$N)
+    #cf$cluster=cluster
+    cf$cluster <- makeCluster(type='MPI',spec=cf$N)
+    num.worker <- length(clusterEvalQ(cf$cluster,Sys.info()))
+    cat("num workers:",num.worker,'\n')
   } else if (cf$mode=='multicore2') {
     cat('[mode=multicore2] we use makeCluster to allocate threads once and for all\n')
     cf$cluster = makeForkCluster(cf$N)
