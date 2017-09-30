@@ -2,12 +2,12 @@ require(plyr)
 require(MSBVAR)
 
 
-# TODO 
+# TODO
 # write documentation for this!
 # setting up the config
-# should be given 
-# list of model parameters including, 
-#   * priority, 
+# should be given
+# list of model parameters including,
+#   * priority,
 #   * moment a priori connection
 #   * transform (optional)
 #   * bounds (optional)
@@ -15,8 +15,8 @@ require(MSBVAR)
 #   * tolerance
 #   * iteration limit
 
-#' create the configuration for the MCMC 
-#' chain. 
+#' create the configuration for the MCMC
+#' chain.
 #' @export
 mopt_config <- function(p) {
 	stopifnot(is.list(p))
@@ -37,7 +37,7 @@ mopt_config <- function(p) {
  cf$params_to_sample = c()	#This is a vector of names: c('delta', 'b')
  cf$objfunc          = MOPT_OBJ_FUNC
  cf$modelinfo      = c()
-                                
+
  cf$run            = 0
  cf$shock_var      = 0.1
  cf$moments_to_use = c()
@@ -74,7 +74,7 @@ samplep <- function(pp,lb,ub) {
 }
 
 #' add data moments to the configuration
-#' @export 
+#' @export
 datamoments <- function(names,values,sds) {
   res = list()
   rr = data.frame(moment=names,value = values, sd = sds)
@@ -101,47 +101,47 @@ datamoments <- function(names,values,sds) {
 
 # mopt_obj_wrapper <- function(p,objfunc=NA) {
 #   m = try( {
-# 
+#
 # get result
-#     r = objfunc(p)  
-# 
+#     r = objfunc(p)
+#
 #     if (!is.list(r)) {
 #       r = list(value=r)
 #     }
-# 
-# check that there is a status 
+#
+# check that there is a status
 # and that values is not NA
-#     if (!('status' %in% names(r))) { 
+#     if (!('status' %in% names(r))) {
 #       r$status=1
 #     }
-# 
+#
 #     if (is.nan(r$value) | is.na(r$value)) {
 #       r$status=-1
 #       stop("objective function produced NA")
 #     }
 #     return(r)
-# 
-#   },silent=TRUE) 
-#   return(m) 
+#
+#   },silent=TRUE)
+#   return(m)
 # returns NA if there is any sort of crash
 # later it would be good to get the error message
 #  }
 
 #' wraper for the objective function. Made public for multicore
-#' @export 
+#' @export
 mopt_obj_wrapper <- function(p,objfunc=NA,errfile='param_error.dat') {
 	m = tryCatch( {
 
 		#         get result
-		r = objfunc(p)  
+		r = objfunc(p)
 
 		if (!is.list(r)) {
 			r = list(value=r)
 		}
 
-		#         check that there is a status 
+		#         check that there is a status
 		#         and that values is not NA
-		if (!('status' %in% names(r))) { 
+		if (!('status' %in% names(r))) {
 			r$status=1
 		}
 
@@ -152,7 +152,7 @@ mopt_obj_wrapper <- function(p,objfunc=NA,errfile='param_error.dat') {
 		r
 	},error = function(e) {
 		list(status=-1,error=e$message)
-	} ) 
+	} )
 
   # if status is <0 we store the parameters in a file
   if (m$status<0) {
@@ -166,7 +166,7 @@ mopt_obj_wrapper <- function(p,objfunc=NA,errfile='param_error.dat') {
     })
   }
 
-	return(m) 
+	return(m)
 	#     returns NA if there is any sort of crash
 	#     later it would be good to get the error message
 }
@@ -175,7 +175,7 @@ mopt_obj_wrapper_custom <- function(p,objfunc=NA) {
 	m = tryCatch( {
 
 		#         get result
-		r = objfunc(p)  
+		r = objfunc(p)
 
 		if (!is.list(r)) {
 			stop('MOPT_OBJ_FUNC must return a list')
@@ -187,8 +187,8 @@ mopt_obj_wrapper_custom <- function(p,objfunc=NA) {
 		r
 	},error = function(e) {
 		list(status=-1,error=e$message)
-	} ) 
-	return(m) 
+	} )
+	return(m)
 }
 
 
@@ -201,12 +201,12 @@ prepare.mopt_config <- function(cf) {
     cat('[mode=mpi] USING MPI !!!!! \n')
     #using RMPI instead of SNOW which is not working with Econ HPC
     #save .Rprofile into your working directory first
-    #it will initialize RMPI 
+    #it will initialize RMPI
     cf$N          = mpi.universe.size()-1
 
     ## creating the cluster
 	  ## size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
-    #require(snow)  
+    #require(snow)
     #cl <- makeCluster(type='MPI',spec=cf$N)
 	  #cf$cl <- cl	# add cluster to the config as well
 
@@ -218,8 +218,8 @@ prepare.mopt_config <- function(cf) {
 	  #cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
     ## setting up the slaves
     #cat("Master: setting directory and sourcing on slaves ( ",cf$wd,  cf$source_on_nodes ," )\n")
-    #eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
-    #eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
+    #eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse='')))
+    #eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse='')))
     #clusterCall(cl, rollcall, cf$logdir)
 
     ## adding the normal lapply
@@ -227,73 +227,79 @@ prepare.mopt_config <- function(cf) {
 
     ## adding the load balanced lapply
     #cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
-	  #cf$N = length(cl) 
-  #} else if (cf$mode=='mpiLB') {
-  #  cat('[mode=mpiLB] USING LOAD BALANCED MPI !!!!! \n')
-  #
-  #  # creating the cluster
-	#  # size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
-  #  require(snow)  
-  #  cl <- makeCluster(type='MPI',spec=cf$N)
-	#  cf$cl <- cl	# add cluster to the config as well
-  #
-	#  # worker roll call
-	#  cf$num.worker <- length(clusterEvalQ(cl,Sys.info()))
-  #  dir.create(cf$logdir,showWarnings=FALSE)
-	#  cat("Master: I've got",cf$num.worker,"workers\n")
-	#  cat("Master: doing rollcall on cluster now\n")
-	#  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
-  #  
-  #  # setting up the slaves
-  #  eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
-  #  eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
-  #  clusterCall(cl, rollcall, cf$logdir)
-  #
-  #  # adding the normal lapply
-  #  cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
-  #
-  #  # adding the load balanced lapply
-  #  cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
-  #
-  #	if (cf$N <= length(cl)){
-  #		warning('benefits of Load Balancing on cluster only materialize\nif you set number of chains N > number of nodes')
-  #	}
+	  #cf$N = length(cl)
+    #} else if (cf$mode=='mpiLB') {
+    #  cat('[mode=mpiLB] USING LOAD BALANCED MPI !!!!! \n')
+    #
+    #  # creating the cluster
+  	#  # size of the cluster is determined by MPIRUN, i.e. in the SGE submit script. not here.
+    #  require(snow)
+    #  cl <- makeCluster(type='MPI',spec=cf$N)
+  	#  cf$cl <- cl	# add cluster to the config as well
+    #
+  	#  # worker roll call
+  	#  cf$num.worker <- length(clusterEvalQ(cl,Sys.info()))
+    #  dir.create(cf$logdir,showWarnings=FALSE)
+  	#  cat("Master: I've got",cf$num.worker,"workers\n")
+  	#  cat("Master: doing rollcall on cluster now\n")
+  	#  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$logdir,"rollcall.txt"),append=FALSE)
+    #
+    #  # setting up the slaves
+    #  eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse='')))
+    #  eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse='')))
+    #  clusterCall(cl, rollcall, cf$logdir)
+    #
+    #  # adding the normal lapply
+    #  cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
+    #
+    #  # adding the load balanced lapply
+    #  cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
+    #
+    #	if (cf$N <= length(cl)){
+    #		warning('benefits of Load Balancing on cluster only materialize\nif you set number of chains N > number of nodes')
+    #	}
   } else if (cf$mode=='mpi2') {
-    cat('[mode=mpi2] we use Rmpi, and we startup the cluster ourselves\n')    
+    cat('[mode=mpi2] we use Rmpi, and we startup the cluster ourselves\n')
     library(Rmpi)
     library(snow)
     np <- mpi.universe.size() - 1
     cluster <- makeMPIcluster(np)
     cf$cluster=cluster
     cf$N= np
+  } else if (cf$mode=='mpi3') {
+    cat('[mode=mpi3] we use Rmpi, and we set worker number N in advance\n')
+    library(Rmpi)
+    library(snow)
+    cluster <- makeMPIcluster(cf$N)
+    cf$cluster=cluster
   } else if (cf$mode=='multicore2') {
-    cat('[mode=multicore2] we use makeCluster to allocate threads once and for all\n')    
-    cf$cluster = makeForkCluster(cf$N) 
+    cat('[mode=multicore2] we use makeCluster to allocate threads once and for all\n')
+    cf$cluster = makeForkCluster(cf$N)
   } else if (cf$mode=='multicore') {
-    cat('[mode=mulicore] threads will be re-allocated at each call \n')    
+    cat('[mode=mulicore] threads will be re-allocated at each call \n')
     require(parallel)
     cf$N= detectCores()-1
 
     #if(Sys.info()[['sysname']]=='Windows') {
     #  cl <- makeCluster(spec=pmin(detectCores(),cf$N),type='MPI')
-    #  
+    #
     #  # worker roll call
     #  dir.create(file.path(cf$wd,"workers"),showWarnings=FALSE)
     #  cat("Master: I've got",num.worker,"workers\n")
     #  cat("Master: doing rollcall on cluster now\n")
     #  cat("Here is the boss talking. Worker roll call on",date(),"\n",file=file.path(cf$wd,"workers","rollcall.txt"),append=FALSE)
     #  # setting up the slaves
-    #  eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse=''))) 
-    #  eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse=''))) 
+    #  eval(parse(text = paste("clusterEvalQ(cl,setwd('",cf$wd,"'))",sep='',collapse='')))
+    #  eval(parse(text = paste("clusterEvalQ(cl,source('",cf$source_on_nodes,"'))",sep='',collapse='')))
     #  clusterCall(cl, rollcall, file.path(cf$wd,"workers"))
-    #  
-    #  
+    #
+    #
     #  # adding the normal lapply
     #  cf$mylapply = function(a,b) { return(parLapply(cl,a,b))}
-    #  
+    #
     #  # adding the load balanced lapply
     #  cf$mylbapply = function(a,b) { return(clusterApplyLB(cl,a,b))}
-    #  
+    #
     #  cf$N = length(cl)
     #} else {
     #  cf$mylapply  = mclapply;
@@ -301,7 +307,7 @@ prepare.mopt_config <- function(cf) {
     #  cf$N= pmin(detectCores(),cf$N)
     #}
   } else if (cf$mode == 'serial') {
-    cat('[mode=serial] NOT USING MPI !!!!! \n')    
+    cat('[mode=serial] NOT USING MPI !!!!! \n')
   } else {
 	  #error(cat('your selected mode: ',cf$mode,' does not exist. please choose from mpi,mpiLB,multicore and serial'))
     error(cat('your selected mode: ',cf$mode,' does not exist. please choose from mpi,multicore and serial'))
@@ -310,8 +316,8 @@ prepare.mopt_config <- function(cf) {
 }
 
 #' cluster rollcall
-#' 
-#' cluster reporting function. makes every worker state their name and 
+#'
+#' cluster reporting function. makes every worker state their name and
 #' writes into a log file
 #' @export
 #' @param dir path to the log directory
@@ -350,7 +356,7 @@ runMOpt <- function(cf,autoload=TRUE) {
     # what is the meaning of these paramters?
     # I find theta, breaks, nu, and kk are used algo.wl.r, acc is used to update sample var.
     cf$theta  = seq(1,l=50)
-    cf$breaks = seq(-2,0,l=50) 
+    cf$breaks = seq(-2,0,l=50)
     cf$acc    = 0.5
     cf$nu     = seq(0,l=50)
     cf$kk     = 2
@@ -362,7 +368,7 @@ runMOpt <- function(cf,autoload=TRUE) {
   # we want to keep a matrix for the chain
   # it should be a data.frame in long format
   # with a chain and iteration indicator
-  # each row will also have the all parameters and the 
+  # each row will also have the all parameters and the
   # objective value
   # we are going to carry 2 arrays
   #   -- param_data: will store all evaluations
@@ -375,13 +381,13 @@ runMOpt <- function(cf,autoload=TRUE) {
   ps = computeInitialCandidates(cf$N,cf)
   param_data = rbind(param_data, evaluateParameters(ps,cf))
   cat('Done with intial candidates\n')
-  cat('Starting main MCMC loop\n')  
-    
-	 
+  cat('Starting main MCMC loop\n')
+
+
   for (i in cf$i:cf$iter) {
 
     cf$i=i
-    #                 step 1, evaluate candidates 
+    #                 step 1, evaluate candidates
     # --------------------------------------------------------
 
     eval_start = as.numeric(proc.time()[3])
@@ -391,7 +397,7 @@ runMOpt <- function(cf,autoload=TRUE) {
     # SAVING VALUES
     if ( (i %% cf$save_freq)==1 & i>10 ) {
       cat(sprintf("%d evals, saving to %s \n",i,cf$file_chain))
-      save(cf,priv,param_data,file=cf$file_chain)      
+      save(cf,priv,param_data,file=cf$file_chain)
     }
 
     #            step 2, updating chain and computing guesses
@@ -409,13 +415,13 @@ runMOpt <- function(cf,autoload=TRUE) {
     # small reporting
     # ----------------
     cat(sprintf('[%d/%d][total: %f][last: %f ( e:%4.2f + a:%4.2f )][m: %f] best value %f \n',
-                  i , cf$iter , 
-                  as.numeric(proc.time()[3]),  
-                  run_time,  
+                  i , cf$iter ,
+                  as.numeric(proc.time()[3]),
+                  run_time,
                   eval_time/run_time,
-                  algo_time/run_time, 
-                  sum(gc()[,"(Mb)"]), 
-                  min(param_data$value,na.rm=TRUE))) 
+                  algo_time/run_time,
+                  sum(gc()[,"(Mb)"]),
+                  min(param_data$value,na.rm=TRUE)))
     last_time = as.numeric(proc.time()[3])
     for (pp in paste('p',cf$params_to_sample,sep='.')) {
       cat(' range for ',pp,' ',range(param_data[,pp]),'\n')
@@ -423,7 +429,7 @@ runMOpt <- function(cf,autoload=TRUE) {
   }
 
   #saving the data set
-  save(cf,priv,param_data,file=cf$file_chain)      
+  save(cf,priv,param_data,file=cf$file_chain)
 
   # stopping the cluster using R snow command
   if (cf$mode=='mpi2') {
